@@ -94,3 +94,16 @@ fn is_scratch(name : String) -> Bool {
 fn is_variable_ref(name : String) -> Bool {
   name.has_prefix("$")
 }
+
+///|
+fn image_registry(name : String) -> String {
+  let slash = name.find("/").unwrap_or(name.length())
+  let first = name[:slash].to_owned()
+  if first.equal_ignore_ascii_case("localhost") ||
+    first.contains(".") ||
+    first.contains(":") {
+    first.to_lower()
+  } else {
+    "docker.io"
+  }
+}

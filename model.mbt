@@ -40,7 +40,19 @@ pub(all) struct Instruction {
   form : InstructionForm
   stage : String?
   copy_from : String?
+  ignored_codes : Array[String]
 } derive(Debug)
+
+///|
+pub(all) struct LintOptions {
+  ignored : Array[String]
+  trusted_registries : Array[String]
+} derive(Debug)
+
+///|
+pub fn default_options() -> LintOptions {
+  { ignored: [], trusted_registries: [] }
+}
 
 ///|
 pub(all) struct Dockerfile {

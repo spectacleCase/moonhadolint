@@ -36,9 +36,20 @@ fn join_continuations(source : String) -> Array[LogicalLine] {
 pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
   let instructions : Array[Instruction] = []
   let mut current_stage : String? = None
+  let mut pending_ignores : Array[String] = []
   for logical in join_continuations(source) {
     let text = logical.text.trim().to_owned()
-    if text.is_empty() || text.has_prefix("#") {
+    if text.is_empty() {
+      continue
+    }
+    if text.has_prefix("#") {
+      match parse_ignore_comment(text) {
+        None => ()
+        Some(codes) =>
+          for code in codes {
+            pending_ignores.push(code)
+          }
+      }
       continue
     }
     let (name, rest) = first_token(text)
@@ -55,6 +66,8 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
     } else {
       None
     }
+    let ignored_codes = pending_ignores
+    pending_ignores = []
     instructions.push({
       kind,
       name,
@@ -63,6 +76,7 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
       form: form_of(rest),
       stage: current_stage,
       copy_from,
+      ignored_codes,
     })
   }
   Ok({ instructions, })
@@ -70,8 +84,16 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
 
 ///|
 pub fn lint_source(source : String) -> Result[LintResult, ParseError] {
+  lint_source_with(source, default_options())
+}
+
+///|
+pub fn lint_source_with(
+  source : String,
+  options : LintOptions,
+) -> Result[LintResult, ParseError] {
   match parse_dockerfile(source) {
     Err(error) => Err(error)
-    Ok(doc) => Ok(lint_dockerfile(doc))
+    Ok(doc) => Ok(lint_dockerfile_with(doc, options))
   }
 }

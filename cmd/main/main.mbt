@@ -5,8 +5,8 @@ fn usage() -> Unit {
       #|MoonHadolint v\{@moonhadolint.version}
       #|
       #|Usage:
-      #|  moonhadolint lint <Dockerfile>
-      #|  moonhadolint json <Dockerfile>
+      #|  moonhadolint lint  [--ignore CODE] [--config FILE] <Dockerfile>
+      #|  moonhadolint json  [--ignore CODE] [--config FILE] <Dockerfile>
       #|  moonhadolint parse <Dockerfile>
       #|  moonhadolint sample
       #|  moonhadolint bad-sample
@@ -14,6 +14,7 @@ fn usage() -> Unit {
       #|
       #|Use "-" as the file path to lint the built-in clean sample.
       #|A bare Dockerfile path is treated as lint.
+      #|Inline comments like `# hadolint ignore=DL3006` suppress the next instruction.
     ),
   )
 }
@@ -31,14 +32,93 @@ fn load_source(path : String) -> Result[String, String] {
 }
 
 ///|
-fn print_lint(path : String, as_json : Bool) -> Int {
+fn load_options(
+  config_path : String?,
+  ignore_arg : String?,
+) -> Result[@moonhadolint.LintOptions, String] {
+  let mut options = @moonhadolint.default_options()
+  match config_path {
+    None => ()
+    Some(path) =>
+      match read_file(path) {
+        None => return Err("cannot read config: \{path}")
+        Some(text) => options = @moonhadolint.parse_config(text)
+      }
+  }
+  match ignore_arg {
+    None => ()
+    Some(text) => {
+      let extra = @moonhadolint.parse_config("ignored: \{text}")
+      for code in extra.ignored {
+        options.ignored.push(code)
+      }
+    }
+  }
+  Ok(options)
+}
+
+///|
+fn take_flag(args : Array[String], index : Int, name : String) -> String? {
+  if args[index] == name && index + 1 < args.length() {
+    Some(args[index + 1])
+  } else if args[index].has_prefix("\{name}=") {
+    Some(args[index][name.length() + 1:].to_owned())
+  } else {
+    None
+  }
+}
+
+///|
+fn parse_lint_args(
+  args : Array[String],
+  start : Int,
+) -> Result[(String, String?, String?), String] {
+  let mut path : String? = None
+  let mut ignore : String? = None
+  let mut config : String? = None
+  let mut i = start
+  while i < args.length() {
+    match take_flag(args, i, "--ignore") {
+      Some(value) => {
+        ignore = Some(value)
+        i += if args[i] == "--ignore" { 2 } else { 1 }
+        continue
+      }
+      None => ()
+    }
+    match take_flag(args, i, "--config") {
+      Some(value) => {
+        config = Some(value)
+        i += if args[i] == "--config" { 2 } else { 1 }
+        continue
+      }
+      None => ()
+    }
+    if args[i].has_prefix("-") && args[i] != "-" {
+      return Err("unknown option: \{args[i]}")
+    }
+    path = Some(args[i])
+    i += 1
+  }
+  match path {
+    None => Err("missing Dockerfile path")
+    Some(file) => Ok((file, ignore, config))
+  }
+}
+
+///|
+fn print_lint(
+  path : String,
+  as_json : Bool,
+  options : @moonhadolint.LintOptions,
+) -> Int {
   match load_source(path) {
     Err(message) => {
       println(message)
       1
     }
     Ok(source) =>
-      match @moonhadolint.lint_source(source) {
+      match @moonhadolint.lint_source_with(source, options) {
         Err(error) => {
           println(error.to_string())
           1
@@ -81,6 +161,24 @@ fn print_parse(path : String) -> Int {
 }
 
 ///|
+fn run_lint(args : Array[String], start : Int, as_json : Bool) -> Int {
+  match parse_lint_args(args, start) {
+    Err(message) => {
+      println(message)
+      1
+    }
+    Ok((path, ignore, config)) =>
+      match load_options(config, ignore) {
+        Err(message) => {
+          println(message)
+          1
+        }
+        Ok(options) => print_lint(path, as_json, options)
+      }
+  }
+}
+
+///|
 fn main {
   let args = @env.args()
   if args.length() < 2 || args[1] == "-h" || args[1] == "--help" {
@@ -104,20 +202,8 @@ fn main {
       println(@moonhadolint.report_rules())
       0
     }
-    "lint" =>
-      if args.length() < 3 {
-        usage()
-        1
-      } else {
-        print_lint(args[2], false)
-      }
-    "json" =>
-      if args.length() < 3 {
-        usage()
-        1
-      } else {
-        print_lint(args[2], true)
-      }
+    "lint" => run_lint(args, 2, false)
+    "json" => run_lint(args, 2, true)
     "parse" =>
       if args.length() < 3 {
         usage()
@@ -125,7 +211,7 @@ fn main {
       } else {
         print_parse(args[2])
       }
-    path => print_lint(path, false)
+    _ => run_lint(args, 1, false)
   }
   if code != 0 {
     exit_process(code)

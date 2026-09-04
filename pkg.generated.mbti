@@ -6,9 +6,17 @@ import {
 }
 
 // Values
+pub fn default_options() -> LintOptions
+
 pub fn lint_dockerfile(Dockerfile) -> LintResult
 
+pub fn lint_dockerfile_with(Dockerfile, LintOptions) -> LintResult
+
 pub fn lint_source(String) -> Result[LintResult, ParseError]
+
+pub fn lint_source_with(String, LintOptions) -> Result[LintResult, ParseError]
+
+pub fn parse_config(String) -> LintOptions
 
 pub fn parse_dockerfile(String) -> Result[Dockerfile, ParseError]
 
@@ -48,6 +56,7 @@ pub(all) struct Instruction {
   form : InstructionForm
   stage : String?
   copy_from : String?
+  ignored_codes : Array[String]
 } derive(@debug.Debug)
 
 pub(all) enum InstructionForm {
@@ -77,6 +86,11 @@ pub(all) enum InstructionKind {
   Onbuild
   Unknown
 } derive(Eq, @debug.Debug)
+
+pub(all) struct LintOptions {
+  ignored : Array[String]
+  trusted_registries : Array[String]
+} derive(@debug.Debug)
 
 pub(all) struct LintResult {
   diagnostics : Array[Diagnostic]

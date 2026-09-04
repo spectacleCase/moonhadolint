@@ -159,6 +159,14 @@ fn check_copy_from(
 
 ///|
 pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
+  lint_dockerfile_with(doc, default_options())
+}
+
+///|
+pub fn lint_dockerfile_with(
+  doc : Dockerfile,
+  options : LintOptions,
+) -> LintResult {
   let diagnostics : Array[Diagnostic] = []
   let named_stages : Array[String] = []
   let mut prev_run = false
@@ -178,7 +186,7 @@ pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
           Some(name) => named_stages.push(name)
           None => ()
         }
-        check_from(inst, diagnostics)
+        check_from(inst, options, diagnostics)
       }
       Workdir =>
         if !workdir_is_absolute(inst.arguments) {
@@ -265,18 +273,61 @@ pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
         )
       }
   }
-  { diagnostics, instruction_count: doc.instructions.length() }
+  let kept : Array[Diagnostic] = []
+  for item in diagnostics {
+    if !is_suppressed(item, doc, options) {
+      kept.push(item)
+    }
+  }
+  { diagnostics: kept, instruction_count: doc.instructions.length() }
 }
 
 ///|
-fn check_from(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
+fn is_suppressed(
+  item : Diagnostic,
+  doc : Dockerfile,
+  options : LintOptions,
+) -> Bool {
+  if contains_code(options.ignored, item.code) {
+    return true
+  }
+  for inst in doc.instructions {
+    if inst.line == item.line && contains_code(inst.ignored_codes, item.code) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+fn check_from(
+  inst : Instruction,
+  options : LintOptions,
+  diagnostics : Array[Diagnostic],
+) -> Unit {
   match parse_from_image(inst.arguments) {
     None =>
       diagnostics.push(
         diagnostic("DL3006", "error", inst.line, "FROM is missing an image."),
       )
     Some(image) => {
-      if is_scratch(image.name) || is_variable_ref(image.name) || image.digest {
+      if is_scratch(image.name) || is_variable_ref(image.name) {
+        return
+      }
+      if options.trusted_registries.length() > 0 {
+        let registry = image_registry(image.name)
+        if !contains_code(options.trusted_registries, registry) {
+          diagnostics.push(
+            diagnostic(
+              "DL3026",
+              "error",
+              inst.line,
+              "Use only an allowed registry: \{registry} is not trusted.",
+            ),
+          )
+        }
+      }
+      if image.digest {
         return
       }
       match image.tag {

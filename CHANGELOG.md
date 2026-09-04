@@ -4,6 +4,8 @@
 
 - Track multi-stage `FROM` aliases and `COPY --from`.
 - Add DL3022 and DL3023 for unknown or self-referencing stages.
+- Honor `# hadolint ignore=` comments, `--ignore`, and a small config file.
+- Add DL3026 for trusted registries.
 
 ## 0.1.0
 

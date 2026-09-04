@@ -80,6 +80,7 @@ pub fn report_rules() -> String {
   out.write_string("DL3022  error    COPY --from must name a prior stage\n")
   out.write_string("DL3023  error    COPY --from cannot target its own stage\n")
   out.write_string("DL3025  warning  Use JSON CMD/ENTRYPOINT\n")
+  out.write_string("DL3026  error    Use only an allowed registry\n")
   out.write_string("DL3042  warning  Use pip --no-cache-dir\n")
   out.write_string("DL3059  warning  Combine consecutive RUN\n")
   out.write_string("DL4000  error    MAINTAINER is deprecated\n")
