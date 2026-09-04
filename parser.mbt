@@ -1,0 +1,64 @@
+///|
+priv struct LogicalLine {
+  text : String
+  line : Int
+}
+
+///|
+fn join_continuations(source : String) -> Array[LogicalLine] {
+  let physical = split_physical_lines(source)
+  let result : Array[LogicalLine] = []
+  let mut i = 0
+  while i < physical.length() {
+    let start_line = i + 1
+    let buf = StringBuilder()
+    let mut continuing = true
+    while continuing && i < physical.length() {
+      let raw = physical[i]
+      let trimmed = raw.trim_end().to_owned()
+      let is_comment = trimmed.trim().has_prefix("#")
+      if !is_comment && trimmed.has_suffix("\\") {
+        buf.write_string(trimmed[:trimmed.length() - 1].to_owned())
+        buf.write_char(' ')
+        i += 1
+      } else {
+        buf.write_string(raw)
+        i += 1
+        continuing = false
+      }
+    }
+    result.push({ text: buf.to_string(), line: start_line })
+  }
+  result
+}
+
+///|
+pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
+  let instructions : Array[Instruction] = []
+  for logical in join_continuations(source) {
+    let text = logical.text.trim().to_owned()
+    if text.is_empty() || text.has_prefix("#") {
+      continue
+    }
+    let (name, rest) = first_token(text)
+    if name.is_empty() {
+      return Err({ line: logical.line, message: "missing instruction" })
+    }
+    instructions.push({
+      kind: kind_of(name),
+      name,
+      arguments: rest.trim().to_owned(),
+      line: logical.line,
+      form: form_of(rest),
+    })
+  }
+  Ok({ instructions, })
+}
+
+///|
+pub fn lint_source(source : String) -> Result[LintResult, ParseError] {
+  match parse_dockerfile(source) {
+    Err(error) => Err(error)
+    Ok(doc) => Ok(lint_dockerfile(doc))
+  }
+}

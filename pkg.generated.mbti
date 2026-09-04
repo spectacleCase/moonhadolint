@@ -1,0 +1,96 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "spectacleCase/moonhadolint"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn lint_dockerfile(Dockerfile) -> LintResult
+
+pub fn lint_source(String) -> Result[LintResult, ParseError]
+
+pub fn parse_dockerfile(String) -> Result[Dockerfile, ParseError]
+
+pub fn report_json(LintResult) -> String
+
+pub fn report_parse(Dockerfile) -> String
+
+pub fn report_rules() -> String
+
+pub fn report_text(LintResult) -> String
+
+pub fn sample_bad_dockerfile() -> String
+
+pub fn sample_dockerfile() -> String
+
+pub let version : String
+
+// Errors
+
+// Types and methods
+pub(all) struct Diagnostic {
+  code : String
+  level : String
+  line : Int
+  message : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Dockerfile {
+  instructions : Array[Instruction]
+} derive(@debug.Debug)
+
+pub(all) struct Instruction {
+  kind : InstructionKind
+  name : String
+  arguments : String
+  line : Int
+  form : InstructionForm
+} derive(@debug.Debug)
+
+pub(all) enum InstructionForm {
+  Shell
+  Json
+  Other
+} derive(Eq, @debug.Debug)
+
+pub(all) enum InstructionKind {
+  From
+  Run
+  Cmd
+  Entrypoint
+  Copy
+  Add
+  Workdir
+  Env
+  Expose
+  User
+  Arg
+  Label
+  Volume
+  Healthcheck
+  Shell
+  Maintainer
+  Stopsignal
+  Onbuild
+  Unknown
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LintResult {
+  diagnostics : Array[Diagnostic]
+  instruction_count : Int
+} derive(@debug.Debug)
+pub fn LintResult::error_count(Self) -> Int
+pub fn LintResult::has_code(Self, String) -> Bool
+pub fn LintResult::has_errors(Self) -> Bool
+pub fn LintResult::warning_count(Self) -> Int
+
+pub(all) struct ParseError {
+  line : Int
+  message : String
+}
+pub impl Show for ParseError
+
+// Type aliases
+
+// Traits
