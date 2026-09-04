@@ -106,6 +106,40 @@ test "pipefail and pip cache" {
 }
 
 ///|
+test "copy from unknown and self stages" {
+  let unknown = @moonhadolint.lint_source(
+    (
+      #|FROM alpine:3.19 AS runtime
+      #|COPY --from=builder /app /app
+      #|USER nobody
+      #|
+    ),
+  ).unwrap()
+  assert_true(unknown.has_code("DL3022"))
+  let self_ref = @moonhadolint.lint_source(
+    (
+      #|FROM alpine:3.19 AS builder
+      #|COPY --from=builder /app /app
+      #|USER nobody
+      #|
+    ),
+  ).unwrap()
+  assert_true(self_ref.has_code("DL3023"))
+  let ok = @moonhadolint.lint_source(
+    (
+      #|FROM alpine:3.19 AS builder
+      #|WORKDIR /src
+      #|FROM alpine:3.19
+      #|COPY --from=builder /src /app
+      #|USER nobody
+      #|
+    ),
+  ).unwrap()
+  assert_false(ok.has_code("DL3022"))
+  assert_false(ok.has_code("DL3023"))
+}
+
+///|
 test "json reports keep diagnostic codes" {
   let result = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
   let text = @moonhadolint.report_text(result)

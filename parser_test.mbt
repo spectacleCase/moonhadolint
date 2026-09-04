@@ -54,3 +54,19 @@ test "parse empty source" {
   let doc = @moonhadolint.parse_dockerfile("").unwrap()
   inspect(doc.instructions.length(), content="0")
 }
+
+///|
+test "parse multi-stage and COPY --from" {
+  let source =
+    #|FROM alpine:3.19 AS builder
+    #|WORKDIR /src
+    #|COPY . /src
+    #|FROM alpine:3.19 AS runtime
+    #|COPY --from=builder /src/app /app
+    #|
+  let doc = @moonhadolint.parse_dockerfile(source).unwrap()
+  assert_true(doc.instructions[0].stage is Some("builder"))
+  assert_true(doc.instructions[2].stage is Some("builder"))
+  assert_true(doc.instructions[3].stage is Some("runtime"))
+  assert_true(doc.instructions[4].copy_from is Some("builder"))
+}

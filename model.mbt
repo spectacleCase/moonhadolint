@@ -38,6 +38,8 @@ pub(all) struct Instruction {
   arguments : String
   line : Int
   form : InstructionForm
+  stage : String?
+  copy_from : String?
 } derive(Debug)
 
 ///|

@@ -100,15 +100,86 @@ fn has_pip_install(arguments : String) -> Bool {
 }
 
 ///|
+fn stage_index_of(value : String) -> Int? {
+  let n = @string.parse_int(value) catch { _ => return None }
+  if n >= 0 {
+    Some(n)
+  } else {
+    None
+  }
+}
+
+///|
+fn check_copy_from(
+  inst : Instruction,
+  named_stages : Array[String],
+  current_index : Int,
+  diagnostics : Array[Diagnostic],
+) -> Unit {
+  match inst.copy_from {
+    None => ()
+    Some(from) => {
+      let current_name = inst.stage.unwrap_or("")
+      let refers_self = (from == current_name && current_name != "") ||
+        (stage_index_of(from) is Some(index) && index == current_index)
+      if refers_self {
+        diagnostics.push(
+          diagnostic(
+            "DL3023",
+            "error",
+            inst.line,
+            "COPY --from cannot reference its own FROM alias.",
+          ),
+        )
+        return
+      }
+      let mut known = false
+      for name in named_stages {
+        if name == from {
+          known = true
+        }
+      }
+      match stage_index_of(from) {
+        Some(index) => if index >= 0 && index < current_index { known = true }
+        None => ()
+      }
+      if !known {
+        diagnostics.push(
+          diagnostic(
+            "DL3022",
+            "error",
+            inst.line,
+            "COPY --from should reference a previously defined FROM alias.",
+          ),
+        )
+      }
+    }
+  }
+}
+
+///|
 pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
   let diagnostics : Array[Diagnostic] = []
+  let named_stages : Array[String] = []
   let mut prev_run = false
   let mut last_user : String? = None
   let mut last_user_line = 1
   let mut has_pipefail = false
+  let mut current_index = -1
   for inst in doc.instructions {
     match inst.kind {
-      From => check_from(inst, diagnostics)
+      From => {
+        current_index += 1
+        prev_run = false
+        last_user = None
+        last_user_line = inst.line
+        has_pipefail = false
+        match inst.stage {
+          Some(name) => named_stages.push(name)
+          None => ()
+        }
+        check_from(inst, diagnostics)
+      }
       Workdir =>
         if !workdir_is_absolute(inst.arguments) {
           diagnostics.push(
@@ -120,7 +191,9 @@ pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
             ),
           )
         }
-      Add =>
+      Copy => check_copy_from(inst, named_stages, current_index, diagnostics)
+      Add => {
+        check_copy_from(inst, named_stages, current_index, diagnostics)
         if add_is_local_file(inst.arguments) {
           diagnostics.push(
             diagnostic(
@@ -131,6 +204,7 @@ pub fn lint_dockerfile(doc : Dockerfile) -> LintResult {
             ),
           )
         }
+      }
       Maintainer =>
         diagnostics.push(
           diagnostic(

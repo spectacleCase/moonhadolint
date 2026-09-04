@@ -55,6 +55,37 @@ fn split_image_ref(image : String) -> FromImage {
 }
 
 ///|
+fn parse_from_stage(arguments : String) -> String? {
+  let parts = tokens(arguments)
+  let mut i = 0
+  while i < parts.length() {
+    if parts[i].equal_ignore_ascii_case("AS") && i + 1 < parts.length() {
+      return Some(parts[i + 1])
+    }
+    i += 1
+  }
+  None
+}
+
+///|
+fn flag_value(arguments : String, name : String) -> String? {
+  let prefix = "--\{name}="
+  let flag = "--\{name}"
+  let parts = tokens(arguments)
+  let mut i = 0
+  while i < parts.length() {
+    if parts[i].has_prefix(prefix) {
+      return Some(parts[i][prefix.length():].to_owned())
+    }
+    if parts[i] == flag && i + 1 < parts.length() {
+      return Some(parts[i + 1])
+    }
+    i += 1
+  }
+  None
+}
+
+///|
 fn is_scratch(name : String) -> Bool {
   name.equal_ignore_ascii_case("scratch")
 }

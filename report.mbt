@@ -77,6 +77,8 @@ pub fn report_rules() -> String {
   out.write_string("DL3018  warning  Pin apk package versions\n")
   out.write_string("DL3019  warning  Use apk --no-cache\n")
   out.write_string("DL3020  error    Prefer COPY over ADD\n")
+  out.write_string("DL3022  error    COPY --from must name a prior stage\n")
+  out.write_string("DL3023  error    COPY --from cannot target its own stage\n")
   out.write_string("DL3025  warning  Use JSON CMD/ENTRYPOINT\n")
   out.write_string("DL3042  warning  Use pip --no-cache-dir\n")
   out.write_string("DL3059  warning  Combine consecutive RUN\n")

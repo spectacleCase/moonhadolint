@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Track multi-stage `FROM` aliases and `COPY --from`.
+- Add DL3022 and DL3023 for unknown or self-referencing stages.
+
 ## 0.1.0
 
 - Scaffolded MoonHadolint as `spectacleCase/moonhadolint`.

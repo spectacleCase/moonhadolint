@@ -35,6 +35,7 @@ fn join_continuations(source : String) -> Array[LogicalLine] {
 ///|
 pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
   let instructions : Array[Instruction] = []
+  let mut current_stage : String? = None
   for logical in join_continuations(source) {
     let text = logical.text.trim().to_owned()
     if text.is_empty() || text.has_prefix("#") {
@@ -44,12 +45,24 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
     if name.is_empty() {
       return Err({ line: logical.line, message: "missing instruction" })
     }
+    let kind = kind_of(name)
+    let arguments = rest.trim().to_owned()
+    if kind is From {
+      current_stage = parse_from_stage(arguments)
+    }
+    let copy_from = if kind is Copy || kind is Add {
+      flag_value(arguments, "from")
+    } else {
+      None
+    }
     instructions.push({
-      kind: kind_of(name),
+      kind,
       name,
-      arguments: rest.trim().to_owned(),
+      arguments,
       line: logical.line,
       form: form_of(rest),
+      stage: current_stage,
+      copy_from,
     })
   }
   Ok({ instructions, })
