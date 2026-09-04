@@ -9,6 +9,7 @@
 - Add DL3003, DL3016, DL3021, DL4003, and DL4004.
 - Add GitHub Actions annotation output.
 - Add DL3044 for empty ENV values.
+- Add DL3011 for invalid EXPOSE ports and DL3024 for duplicate FROM aliases.
 
 ## 0.1.0
 

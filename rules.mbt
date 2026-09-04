@@ -213,7 +213,10 @@ pub fn lint_dockerfile_with(
         cmd_count = 0
         entrypoint_count = 0
         match inst.stage {
-          Some(name) => named_stages.push(name)
+          Some(name) => {
+            check_unique_stage(name, named_stages, inst.line, diagnostics)
+            named_stages.push(name)
+          }
           None => ()
         }
         check_from(inst, options, diagnostics)
@@ -256,6 +259,7 @@ pub fn lint_dockerfile_with(
           ),
         )
       Env => check_env(inst, diagnostics)
+      Expose => check_expose(inst, diagnostics)
       User => {
         last_user = Some(first_arg(inst.arguments))
         last_user_line = inst.line
