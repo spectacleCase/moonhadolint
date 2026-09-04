@@ -103,6 +103,7 @@ pub fn report_rules() -> String {
   out.write_string("DL3025  warning  Use JSON CMD/ENTRYPOINT\n")
   out.write_string("DL3026  error    Use only an allowed registry\n")
   out.write_string("DL3042  warning  Use pip --no-cache-dir\n")
+  out.write_string("DL3044  warning  Do not use empty ENV values\n")
   out.write_string("DL3059  warning  Combine consecutive RUN\n")
   out.write_string("DL4000  error    MAINTAINER is deprecated\n")
   out.write_string("DL4003  warning  Multiple CMD instructions\n")

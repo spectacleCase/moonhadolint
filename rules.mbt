@@ -255,6 +255,7 @@ pub fn lint_dockerfile_with(
             "MAINTAINER is deprecated. Use LABEL instead.",
           ),
         )
+      Env => check_env(inst, diagnostics)
       User => {
         last_user = Some(first_arg(inst.arguments))
         last_user_line = inst.line
