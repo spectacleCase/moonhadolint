@@ -78,7 +78,7 @@ test "parse FROM line" {
 
 ## 规则
 
-当前内置 40 条 hadolint 对齐规则，可用 `moonhadolint rules` 列出。覆盖镜像标签、多阶段 `COPY --from`、包管理器、USER/WORKDIR、LABEL 和 CMD/ENTRYPOINT 等常见问题。
+当前内置 45 条规则（含 4 条高频 shell 子集，编号对齐 ShellCheck），可用 `moonhadolint rules` 列出。覆盖镜像标签、多阶段 `COPY --from`、包管理器、USER/WORKDIR、LABEL、CMD/ENTRYPOINT，以及对 `RUN` 中未加引号的变量和未保护的 `cd`。
 
 ```mbt check
 ///|
@@ -93,7 +93,7 @@ MoonHadolint 首版有意保持聚焦：
 
 - 只做本地 Dockerfile 文本的解析和规则检查；
 - 覆盖高频指令和最有用的一批 hadolint 规则；
-- 不是完整 shell 分析器，也不接入 ShellCheck；
+- 对 `RUN` 只做高频 shell 子集（SC2086 / SC2046 / SC2068 / SC2164），不是完整 ShellCheck；
 - 不替代 Docker build、BuildKit 或镜像扫描工具。
 
 规则编号与 [hadolint](https://github.com/hadolint/hadolint) 对齐，实现使用 MoonBit 重写，许可证为 Apache-2.0。

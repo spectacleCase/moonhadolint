@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Parse structured instruction nodes for FROM, COPY, ENV, CMD, and RUN.
+- Add a small shell checker for SC2086, SC2046, SC2068, and SC2164.
+- Add DL3061 for invalid first instructions.
+
 ## 0.1.1
 
 - Publish a structured rule catalog used by `rules` output and docs.

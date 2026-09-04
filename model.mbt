@@ -1,5 +1,5 @@
 ///|
-pub let version : String = "0.1.1"
+pub let version : String = "0.1.2"
 
 ///|
 pub(all) enum InstructionKind {
@@ -41,6 +41,7 @@ pub(all) struct Instruction {
   stage : String?
   copy_from : String?
   ignored_codes : Array[String]
+  node : Node
 } derive(Debug)
 
 ///|

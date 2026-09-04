@@ -72,6 +72,19 @@ pub fn all_rules() -> Array[RuleInfo] {
       summary: "Multiple ENTRYPOINT instructions",
     },
     { code: "DL4006", level: "warning", summary: "Set pipefail before pipes" },
+    {
+      code: "DL3061",
+      level: "error",
+      summary: "Dockerfile must begin with FROM or ARG",
+    },
+    { code: "SC2046", level: "warning", summary: "Quote command substitutions" },
+    { code: "SC2068", level: "warning", summary: "Quote $@ and $* expansions" },
+    {
+      code: "SC2086",
+      level: "warning",
+      summary: "Quote variables to prevent splitting",
+    },
+    { code: "SC2164", level: "warning", summary: "Guard cd with || exit" },
   ]
 }
 

@@ -43,6 +43,13 @@ pub let version : String
 // Errors
 
 // Types and methods
+pub(all) struct CopyNode {
+  from_stage : String?
+  chown : String?
+  sources : Array[String]
+  dest : String
+} derive(Eq, @debug.Debug)
+
 pub(all) struct Diagnostic {
   code : String
   level : String
@@ -55,6 +62,20 @@ pub(all) struct Dockerfile {
   instructions : Array[Instruction]
 } derive(@debug.Debug)
 
+pub(all) struct ExecNode {
+  form : InstructionForm
+  argv : Array[String]
+  raw : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct FromNode {
+  image : String
+  tag : String?
+  digest : Bool
+  platform : String?
+  as_name : String?
+} derive(Eq, @debug.Debug)
+
 pub(all) struct Instruction {
   kind : InstructionKind
   name : String
@@ -64,6 +85,7 @@ pub(all) struct Instruction {
   stage : String?
   copy_from : String?
   ignored_codes : Array[String]
+  node : Node
 } derive(@debug.Debug)
 
 pub(all) enum InstructionForm {
@@ -110,6 +132,27 @@ pub fn LintResult::has_errors(Self) -> Bool
 pub fn LintResult::should_fail(Self, String) -> Bool
 pub fn LintResult::warning_count(Self) -> Int
 
+pub(all) enum Node {
+  From(FromNode)
+  Run(RunNode)
+  Copy(CopyNode)
+  Add(CopyNode)
+  Env(Array[PairNode])
+  Arg(PairNode)
+  Label(Array[PairNode])
+  Expose(Array[String])
+  Cmd(ExecNode)
+  Entrypoint(ExecNode)
+  Workdir(String)
+  User(String)
+  Other
+} derive(@debug.Debug)
+
+pub(all) struct PairNode {
+  key : String
+  value : String
+} derive(Eq, @debug.Debug)
+
 pub(all) struct ParseError {
   line : Int
   message : String
@@ -120,6 +163,14 @@ pub(all) struct RuleInfo {
   code : String
   level : String
   summary : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct RunNode {
+  form : InstructionForm
+  script : String
+  argv : Array[String]
+  has_pipe : Bool
+  has_heredoc : Bool
 } derive(Eq, @debug.Debug)
 
 // Type aliases

@@ -114,15 +114,17 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
     }
     let ignored_codes = pending_ignores
     pending_ignores = []
+    let form = form_of(rest)
     instructions.push({
       kind,
       name,
       arguments,
       line: logical.line,
-      form: form_of(rest),
+      form,
       stage: current_stage,
       copy_from,
       ignored_codes,
+      node: parse_node(kind, arguments, form),
     })
   }
   Ok({ instructions, })

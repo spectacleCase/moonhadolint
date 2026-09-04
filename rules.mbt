@@ -230,6 +230,20 @@ pub fn lint_dockerfile_with(
   let mut wget_line = 0
   let mut curl_line = 0
   let seen_labels : Array[String] = []
+  if doc.instructions.length() > 0 {
+    match doc.instructions[0].kind {
+      From | Arg => ()
+      _ =>
+        diagnostics.push(
+          diagnostic(
+            "DL3061",
+            "error",
+            doc.instructions[0].line,
+            "Invalid instruction order. Dockerfile must begin with FROM, ARG, or a comment.",
+          ),
+        )
+    }
+  }
   for inst in doc.instructions {
     match inst.kind {
       From => {
@@ -318,6 +332,13 @@ pub fn lint_dockerfile_with(
           curl_line = inst.line
         }
         check_run(inst, has_pipefail, diagnostics)
+        match inst.node {
+          Run(run) =>
+            if run.form is Shell {
+              check_shell(inst, run.script, diagnostics)
+            }
+          _ => ()
+        }
       }
       Cmd => {
         cmd_count += 1
@@ -409,27 +430,25 @@ fn check_from(
   options : LintOptions,
   diagnostics : Array[Diagnostic],
 ) -> Unit {
-  match parse_from_image(inst.arguments) {
-    None =>
-      diagnostics.push(
-        diagnostic("DL3006", "error", inst.line, "FROM is missing an image."),
-      )
-    Some(image) => {
-      if is_scratch(image.name) || is_variable_ref(image.name) {
+  match inst.node {
+    From(image) => {
+      if is_scratch(image.image) || is_variable_ref(image.image) {
         return
       }
-      if inst.arguments.contains("--platform") {
-        diagnostics.push(
-          diagnostic(
-            "DL3029",
-            "warning",
-            inst.line,
-            "Do not use --platform= with FROM. Use build arguments or the build command instead.",
-          ),
-        )
+      match image.platform {
+        None => ()
+        Some(_) =>
+          diagnostics.push(
+            diagnostic(
+              "DL3029",
+              "warning",
+              inst.line,
+              "Do not use --platform= with FROM. Use build arguments or the build command instead.",
+            ),
+          )
       }
       if options.trusted_registries.length() > 0 {
-        let registry = image_registry(image.name)
+        let registry = image_registry(image.image)
         if !contains_code(options.trusted_registries, registry) {
           diagnostics.push(
             diagnostic(
@@ -467,6 +486,10 @@ fn check_from(
           }
       }
     }
+    _ =>
+      diagnostics.push(
+        diagnostic("DL3006", "error", inst.line, "FROM is missing an image."),
+      )
   }
 }
 
