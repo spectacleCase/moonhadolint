@@ -12,6 +12,7 @@
 - Add DL3011 for invalid EXPOSE ports and DL3024 for duplicate FROM aliases.
 - Add apt/yum/dnf/gem, wget/curl, and FROM --platform rules.
 - Parse Dockerfile heredoc bodies such as `RUN cat <<EOF`.
+- Attach the current FROM stage name to each diagnostic and JSON report.
 
 ## 0.1.0
 

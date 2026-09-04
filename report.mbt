@@ -11,8 +11,12 @@ pub fn report_text(result : LintResult) -> String {
   } else {
     out.write_string("\n")
     for item in result.diagnostics {
+      let stage = match item.stage {
+        None => ""
+        Some(name) => " [\{name}]"
+      }
       out.write_string(
-        "\{item.level}: \{item.code} at line \{item.line}: \{item.message}\n",
+        "\{item.level}: \{item.code} at line \{item.line}\{stage}: \{item.message}\n",
       )
     }
   }
@@ -33,8 +37,12 @@ pub fn report_json(result : LintResult) -> String {
   let mut i = 0
   for item in result.diagnostics {
     let comma = if i == last { "" } else { "," }
+    let stage_json = match item.stage {
+      None => "null"
+      Some(name) => "\"\{json_escape(name)}\""
+    }
     out.write_string(
-      "    {\"code\": \"\{json_escape(item.code)}\", \"level\": \"\{json_escape(item.level)}\", \"line\": \{item.line}, \"message\": \"\{json_escape(item.message)}\"}\{comma}\n",
+      "    {\"code\": \"\{json_escape(item.code)}\", \"level\": \"\{json_escape(item.level)}\", \"line\": \{item.line}, \"stage\": \{stage_json}, \"message\": \"\{json_escape(item.message)}\"}\{comma}\n",
     )
     i += 1
   }

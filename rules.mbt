@@ -5,7 +5,32 @@ fn diagnostic(
   line : Int,
   message : String,
 ) -> Diagnostic {
-  { code, level, line, message }
+  { code, level, line, message, stage: None }
+}
+
+///|
+fn stage_at(doc : Dockerfile, line : Int) -> String? {
+  for inst in doc.instructions {
+    if inst.line == line {
+      return inst.stage
+    }
+  }
+  if doc.instructions.length() > 0 {
+    doc.instructions[doc.instructions.length() - 1].stage
+  } else {
+    None
+  }
+}
+
+///|
+fn with_stage(item : Diagnostic, doc : Dockerfile) -> Diagnostic {
+  {
+    code: item.code,
+    level: item.level,
+    line: item.line,
+    message: item.message,
+    stage: stage_at(doc, item.line),
+  }
 }
 
 ///|
@@ -346,7 +371,7 @@ pub fn lint_dockerfile_with(
   let kept : Array[Diagnostic] = []
   for item in diagnostics {
     if !is_suppressed(item, doc, options) {
-      kept.push(item)
+      kept.push(with_stage(item, doc))
     }
   }
   { diagnostics: kept, instruction_count: doc.instructions.length() }

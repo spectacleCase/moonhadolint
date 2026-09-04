@@ -162,6 +162,24 @@ test "extra high-frequency rules" {
 }
 
 ///|
+test "diagnostics record the current FROM stage" {
+  let result = @moonhadolint.lint_source(
+    (
+      #|FROM alpine:3.19 AS builder
+      #|WORKDIR src
+      #|
+    ),
+  ).unwrap()
+  let mut found = false
+  for item in result.diagnostics {
+    if item.code == "DL3000" && item.stage is Some("builder") {
+      found = true
+    }
+  }
+  assert_true(found)
+}
+
+///|
 test "github annotations include file and line" {
   let result = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
   let text = @moonhadolint.report_github(result, path="Dockerfile")

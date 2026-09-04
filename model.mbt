@@ -65,6 +65,7 @@ pub(all) struct Diagnostic {
   level : String
   line : Int
   message : String
+  stage : String?
 } derive(Eq, Debug)
 
 ///|

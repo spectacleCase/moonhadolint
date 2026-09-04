@@ -44,6 +44,7 @@ pub(all) struct Diagnostic {
   level : String
   line : Int
   message : String
+  stage : String?
 } derive(Eq, @debug.Debug)
 
 pub(all) struct Dockerfile {
