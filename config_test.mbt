@@ -17,6 +17,7 @@ test "options and config ignore rules" {
   let options : @moonhadolint.LintOptions = {
     ignored: ["DL3006"],
     trusted_registries: [],
+    required_labels: [],
   }
   let result = @moonhadolint.lint_source_with(source, options).unwrap()
   assert_false(result.has_code("DL3006"))
@@ -38,6 +39,7 @@ test "trusted registries emit DL3026" {
   let options : @moonhadolint.LintOptions = {
     ignored: ["DL3006"],
     trusted_registries: ["docker.io"],
+    required_labels: [],
   }
   let trusted = @moonhadolint.lint_source_with(
     "FROM ubuntu:22.04\nUSER nobody\n", options,

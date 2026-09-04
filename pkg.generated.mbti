@@ -93,6 +93,7 @@ pub(all) enum InstructionKind {
 pub(all) struct LintOptions {
   ignored : Array[String]
   trusted_registries : Array[String]
+  required_labels : Array[String]
 } derive(@debug.Debug)
 
 pub(all) struct LintResult {

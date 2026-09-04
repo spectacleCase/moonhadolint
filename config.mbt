@@ -45,6 +45,7 @@ fn contains_code(codes : Array[String], code : String) -> Bool {
 pub fn parse_config(source : String) -> LintOptions {
   let ignored : Array[String] = []
   let trusted : Array[String] = []
+  let required : Array[String] = []
   let mut section = ""
   for line in split_physical_lines(source) {
     let text = line.trim().to_owned()
@@ -57,6 +58,23 @@ pub fn parse_config(source : String) -> LintOptions {
       if !rest.is_empty() {
         for code in split_codes(rest) {
           ignored.push(code)
+        }
+      }
+      continue
+    }
+    if text.has_prefix("requiredLabels:") || text.has_prefix("required:") {
+      section = "required"
+      let prefix = if text.has_prefix("requiredLabels:") { 15 } else { 9 }
+      let rest = text[prefix:].trim().to_owned()
+      if !rest.is_empty() {
+        for
+          item in tokens(
+            rest
+            .replace(old="[", new=" ")
+            .replace(old="]", new=" ")
+            .replace(old=",", new=" "),
+          ) {
+          required.push(item)
         }
       }
       continue
@@ -81,8 +99,10 @@ pub fn parse_config(source : String) -> LintOptions {
         ignored.push(item.to_upper())
       } else if section == "trusted" {
         trusted.push(item.to_lower())
+      } else if section == "required" {
+        required.push(item)
       }
     }
   }
-  { ignored, trusted_registries: trusted }
+  { ignored, trusted_registries: trusted, required_labels: required }
 }

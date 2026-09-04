@@ -47,11 +47,12 @@ pub(all) struct Instruction {
 pub(all) struct LintOptions {
   ignored : Array[String]
   trusted_registries : Array[String]
+  required_labels : Array[String]
 } derive(Debug)
 
 ///|
 pub fn default_options() -> LintOptions {
-  { ignored: [], trusted_registries: [] }
+  { ignored: [], trusted_registries: [], required_labels: [] }
 }
 
 ///|

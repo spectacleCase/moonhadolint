@@ -121,6 +121,8 @@ pub fn report_rules() -> String {
   out.write_string("DL3041  warning  Pin dnf package versions\n")
   out.write_string("DL3042  warning  Use pip --no-cache-dir\n")
   out.write_string("DL3044  warning  Do not use empty ENV values\n")
+  out.write_string("DL3048  warning  Invalid LABEL key\n")
+  out.write_string("DL3049  warning  Required LABEL is missing\n")
   out.write_string("DL3059  warning  Combine consecutive RUN\n")
   out.write_string("DL4000  error    MAINTAINER is deprecated\n")
   out.write_string("DL4001  warning  Do not mix wget and curl\n")

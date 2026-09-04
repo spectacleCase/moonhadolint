@@ -229,6 +229,7 @@ pub fn lint_dockerfile_with(
   let mut entrypoint_count = 0
   let mut wget_line = 0
   let mut curl_line = 0
+  let seen_labels : Array[String] = []
   for inst in doc.instructions {
     match inst.kind {
       From => {
@@ -287,6 +288,13 @@ pub fn lint_dockerfile_with(
         )
       Env => check_env(inst, diagnostics)
       Expose => check_expose(inst, diagnostics)
+      Label => {
+        check_label(inst, diagnostics)
+        for pair in env_pairs(inst.arguments) {
+          let (key, _) = pair
+          seen_labels.push(key)
+        }
+      }
       User => {
         last_user = Some(first_arg(inst.arguments))
         last_user_line = inst.line
@@ -343,6 +351,7 @@ pub fn lint_dockerfile_with(
     }
     prev_run = inst.kind is Run
   }
+  check_required_labels(seen_labels, options.required_labels, diagnostics)
   if wget_line > 0 && curl_line > 0 {
     diagnostics.push(
       diagnostic(

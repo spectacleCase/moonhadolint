@@ -14,6 +14,7 @@
 - Parse Dockerfile heredoc bodies such as `RUN cat <<EOF`.
 - Attach the current FROM stage name to each diagnostic and JSON report.
 - Read Dockerfiles from stdin and honor `--threshold error|warning|never`.
+- Add DL3048 / DL3049 for invalid and required LABEL keys.
 
 ## 0.1.0
 
