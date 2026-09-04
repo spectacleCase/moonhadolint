@@ -50,6 +50,23 @@ test "parse from platform and alias" {
 }
 
 ///|
+test "parse heredoc RUN body" {
+  let source =
+    #|FROM alpine:3.19
+    #|RUN cat <<EOF
+    #|hello
+    #|world
+    #|EOF
+    #|USER nobody
+    #|
+  let doc = @moonhadolint.parse_dockerfile(source).unwrap()
+  inspect(doc.instructions.length(), content="3")
+  assert_true(doc.instructions[1].arguments.contains("hello"))
+  assert_true(doc.instructions[1].arguments.contains("world"))
+  assert_true(doc.instructions[2].kind is User)
+}
+
+///|
 test "parse empty source" {
   let doc = @moonhadolint.parse_dockerfile("").unwrap()
   inspect(doc.instructions.length(), content="0")

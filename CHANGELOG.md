@@ -11,6 +11,7 @@
 - Add DL3044 for empty ENV values.
 - Add DL3011 for invalid EXPOSE ports and DL3024 for duplicate FROM aliases.
 - Add apt/yum/dnf/gem, wget/curl, and FROM --platform rules.
+- Parse Dockerfile heredoc bodies such as `RUN cat <<EOF`.
 
 ## 0.1.0
 

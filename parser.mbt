@@ -5,6 +5,39 @@ priv struct LogicalLine {
 }
 
 ///|
+fn strip_quotes(value : String) -> String {
+  if value.length() >= 2 &&
+    (
+      (value.has_prefix("'") && value.has_suffix("'")) ||
+      (value.has_prefix("\"") && value.has_suffix("\""))
+    ) {
+    value[1:value.length() - 1].to_owned()
+  } else {
+    value
+  }
+}
+
+///|
+fn heredoc_delimiter(line : String) -> String? {
+  match line.find("<<") {
+    None => None
+    Some(index) => {
+      let mut rest = line[index + 2:].to_owned()
+      if rest.has_prefix("-") {
+        rest = rest[1:].to_owned()
+      }
+      let (token, _) = first_token(rest)
+      let delim = strip_quotes(token)
+      if delim.is_empty() || delim.has_prefix("<") {
+        None
+      } else {
+        Some(delim)
+      }
+    }
+  }
+}
+
+///|
 fn join_continuations(source : String) -> Array[LogicalLine] {
   let physical = split_physical_lines(source)
   let result : Array[LogicalLine] = []
@@ -24,6 +57,19 @@ fn join_continuations(source : String) -> Array[LogicalLine] {
       } else {
         buf.write_string(raw)
         i += 1
+        match heredoc_delimiter(trimmed) {
+          None => ()
+          Some(delim) =>
+            while i < physical.length() {
+              buf.write_char('\n')
+              buf.write_string(physical[i])
+              let closed = physical[i].trim().to_owned() == delim
+              i += 1
+              if closed {
+                break
+              }
+            }
+        }
         continuing = false
       }
     }
