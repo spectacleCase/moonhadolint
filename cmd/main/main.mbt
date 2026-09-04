@@ -5,15 +5,16 @@ fn usage() -> Unit {
       #|MoonHadolint v\{@moonhadolint.version}
       #|
       #|Usage:
-      #|  moonhadolint lint     [--ignore CODE] [--config FILE] <Dockerfile>
-      #|  moonhadolint json     [--ignore CODE] [--config FILE] <Dockerfile>
-      #|  moonhadolint annotate [--ignore CODE] [--config FILE] <Dockerfile>
+      #|  moonhadolint lint     [--ignore CODE] [--config FILE] [--threshold LEVEL] <Dockerfile>
+      #|  moonhadolint json     [--ignore CODE] [--config FILE] [--threshold LEVEL] <Dockerfile>
+      #|  moonhadolint annotate [--ignore CODE] [--config FILE] [--threshold LEVEL] <Dockerfile>
       #|  moonhadolint parse    <Dockerfile>
       #|  moonhadolint sample
       #|  moonhadolint bad-sample
       #|  moonhadolint rules
       #|
-      #|Use "-" as the file path to lint the built-in clean sample.
+      #|Use "-" to read a Dockerfile from stdin.
+      #|--threshold is error (default), warning, or never.
       #|A bare Dockerfile path is treated as lint.
       #|Inline comments like `# hadolint ignore=DL3006` suppress the next instruction.
     ),
@@ -23,7 +24,7 @@ fn usage() -> Unit {
 ///|
 fn load_source(path : String) -> Result[String, String] {
   if path == "-" {
-    Ok(@moonhadolint.sample_dockerfile())
+    Ok(read_stdin())
   } else {
     match read_file(path) {
       None => Err("cannot read file: \{path}")
@@ -73,10 +74,11 @@ fn take_flag(args : Array[String], index : Int, name : String) -> String? {
 fn parse_lint_args(
   args : Array[String],
   start : Int,
-) -> Result[(String, String?, String?), String] {
+) -> Result[(String, String?, String?, String), String] {
   let mut path : String? = None
   let mut ignore : String? = None
   let mut config : String? = None
+  let mut threshold = "error"
   let mut i = start
   while i < args.length() {
     match take_flag(args, i, "--ignore") {
@@ -95,6 +97,14 @@ fn parse_lint_args(
       }
       None => ()
     }
+    match take_flag(args, i, "--threshold") {
+      Some(value) => {
+        threshold = value
+        i += if args[i] == "--threshold" { 2 } else { 1 }
+        continue
+      }
+      None => ()
+    }
     if args[i].has_prefix("-") && args[i] != "-" {
       return Err("unknown option: \{args[i]}")
     }
@@ -103,7 +113,7 @@ fn parse_lint_args(
   }
   match path {
     None => Err("missing Dockerfile path")
-    Some(file) => Ok((file, ignore, config))
+    Some(file) => Ok((file, ignore, config, threshold))
   }
 }
 
@@ -112,6 +122,7 @@ fn print_lint(
   path : String,
   format : String,
   options : @moonhadolint.LintOptions,
+  threshold : String,
 ) -> Int {
   match load_source(path) {
     Err(message) => {
@@ -130,7 +141,7 @@ fn print_lint(
             "github" => println(@moonhadolint.report_github(result, path~))
             _ => println(@moonhadolint.report_text(result))
           }
-          if result.has_errors() {
+          if result.should_fail(threshold) {
             1
           } else {
             0
@@ -168,13 +179,13 @@ fn run_lint(args : Array[String], start : Int, format : String) -> Int {
       println(message)
       1
     }
-    Ok((path, ignore, config)) =>
+    Ok((path, ignore, config, threshold)) =>
       match load_options(config, ignore) {
         Err(message) => {
           println(message)
           1
         }
-        Ok(options) => print_lint(path, format, options)
+        Ok(options) => print_lint(path, format, options, threshold)
       }
   }
 }

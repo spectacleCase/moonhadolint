@@ -102,6 +102,7 @@ pub(all) struct LintResult {
 pub fn LintResult::error_count(Self) -> Int
 pub fn LintResult::has_code(Self, String) -> Bool
 pub fn LintResult::has_errors(Self) -> Bool
+pub fn LintResult::should_fail(Self, String) -> Bool
 pub fn LintResult::warning_count(Self) -> Int
 
 pub(all) struct ParseError {

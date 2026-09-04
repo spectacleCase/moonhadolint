@@ -180,6 +180,20 @@ test "diagnostics record the current FROM stage" {
 }
 
 ///|
+test "failure threshold treats warnings and errors differently" {
+  let warnings_only = @moonhadolint.lint_source(
+    "FROM alpine:latest\nUSER nobody\n",
+  ).unwrap()
+  assert_false(warnings_only.has_errors())
+  assert_true(warnings_only.should_fail("warning"))
+  assert_false(warnings_only.should_fail("error"))
+  assert_false(warnings_only.should_fail("never"))
+  let errors = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
+  assert_true(errors.should_fail("error"))
+  assert_false(errors.should_fail("never"))
+}
+
+///|
 test "github annotations include file and line" {
   let result = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
   let text = @moonhadolint.report_github(result, path="Dockerfile")

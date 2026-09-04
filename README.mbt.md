@@ -54,7 +54,7 @@ moonhadolint bad-sample
 moonhadolint rules
 ```
 
-文件路径写成 `-` 时，使用内置干净示例。直接传入 Dockerfile 路径时，默认执行 `lint`。
+文件路径写成 `-` 时从标准输入读取。直接传入 Dockerfile 路径时，默认执行 `lint`。`--threshold` 可以是 `error`、`warning` 或 `never`。
 
 ## 库 API
 

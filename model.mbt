@@ -113,6 +113,15 @@ pub fn LintResult::has_errors(self : LintResult) -> Bool {
 }
 
 ///|
+pub fn LintResult::should_fail(self : LintResult, threshold : String) -> Bool {
+  match threshold {
+    "never" => false
+    "warning" => self.diagnostics.length() > 0
+    _ => self.has_errors()
+  }
+}
+
+///|
 pub fn LintResult::has_code(self : LintResult, code : String) -> Bool {
   for item in self.diagnostics {
     if item.code == code {

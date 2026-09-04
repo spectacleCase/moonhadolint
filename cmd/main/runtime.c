@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -46,6 +47,38 @@ moonbit_bytes_t moonhadolint_read_file(moonbit_bytes_t path) {
   if (read != (size_t)size) {
     return moonbit_make_bytes(0, 0);
   }
+  return bytes;
+}
+
+MOONBIT_FFI_EXPORT
+moonbit_bytes_t moonhadolint_read_stdin(void) {
+  size_t cap = 4096;
+  size_t len = 0;
+  char *buf = (char *)malloc(cap);
+  if (buf == NULL) {
+    return moonbit_make_bytes(0, 0);
+  }
+  for (;;) {
+    if (len + 1024 > cap) {
+      cap *= 2;
+      char *grown = (char *)realloc(buf, cap);
+      if (grown == NULL) {
+        free(buf);
+        return moonbit_make_bytes(0, 0);
+      }
+      buf = grown;
+    }
+    size_t n = fread(buf + len, 1, 1024, stdin);
+    len += n;
+    if (n < 1024) {
+      break;
+    }
+  }
+  moonbit_bytes_t bytes = moonbit_make_bytes((int32_t)len, 0);
+  if (len > 0) {
+    memcpy(bytes, buf, len);
+  }
+  free(buf);
   return bytes;
 }
 
