@@ -1,5 +1,5 @@
 ///|
-pub let version : String = "0.1.0"
+pub let version : String = "0.1.1"
 
 ///|
 pub(all) enum InstructionKind {

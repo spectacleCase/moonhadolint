@@ -76,6 +76,17 @@ test "parse FROM line" {
 }
 ```
 
+## 规则
+
+当前内置 40 条 hadolint 对齐规则，可用 `moonhadolint rules` 列出。覆盖镜像标签、多阶段 `COPY --from`、包管理器、USER/WORKDIR、LABEL 和 CMD/ENTRYPOINT 等常见问题。
+
+```mbt check
+///|
+test "catalog includes FROM tag rule" {
+  assert_true(@moonhadolint.has_rule("DL3006"))
+}
+```
+
 ## 当前范围
 
 MoonHadolint 首版有意保持聚焦：

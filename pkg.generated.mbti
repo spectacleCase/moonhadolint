@@ -6,7 +6,11 @@ import {
 }
 
 // Values
+pub fn all_rules() -> Array[RuleInfo]
+
 pub fn default_options() -> LintOptions
+
+pub fn has_rule(String) -> Bool
 
 pub fn lint_dockerfile(Dockerfile) -> LintResult
 
@@ -111,6 +115,12 @@ pub(all) struct ParseError {
   message : String
 }
 pub impl Show for ParseError
+
+pub(all) struct RuleInfo {
+  code : String
+  level : String
+  summary : String
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 
