@@ -44,6 +44,24 @@ pub fn report_json(result : LintResult) -> String {
 }
 
 ///|
+pub fn report_github(
+  result : LintResult,
+  path? : String = "Dockerfile",
+) -> String {
+  let out = StringBuilder()
+  for item in result.diagnostics {
+    let kind = if item.level == "error" { "error" } else { "warning" }
+    out.write_string(
+      "::\{kind} file=\{path},line=\{item.line}::\{item.code} \{item.message}\n",
+    )
+  }
+  if result.diagnostics.length() == 0 {
+    out.write_string("No issues found.\n")
+  }
+  out.to_string()
+}
+
+///|
 pub fn report_parse(doc : Dockerfile) -> String {
   let out = StringBuilder()
   if doc.instructions.length() == 0 {
@@ -65,6 +83,7 @@ pub fn report_rules() -> String {
   out.write_string("======================\n")
   out.write_string("DL3000  error    Use absolute WORKDIR\n")
   out.write_string("DL3002  warning  Last USER should not be root\n")
+  out.write_string("DL3003  warning  Use WORKDIR instead of cd\n")
   out.write_string("DL3004  error    Do not use sudo\n")
   out.write_string("DL3005  error    Do not use apt-get upgrade\n")
   out.write_string("DL3006  error    Always tag FROM images\n")
@@ -74,9 +93,11 @@ pub fn report_rules() -> String {
   out.write_string("DL3013  warning  Pin pip package versions\n")
   out.write_string("DL3014  warning  Use apt-get -y\n")
   out.write_string("DL3015  warning  Use --no-install-recommends\n")
+  out.write_string("DL3016  warning  Pin npm package versions\n")
   out.write_string("DL3018  warning  Pin apk package versions\n")
   out.write_string("DL3019  warning  Use apk --no-cache\n")
   out.write_string("DL3020  error    Prefer COPY over ADD\n")
+  out.write_string("DL3021  error    Multi-source COPY dest must end with /\n")
   out.write_string("DL3022  error    COPY --from must name a prior stage\n")
   out.write_string("DL3023  error    COPY --from cannot target its own stage\n")
   out.write_string("DL3025  warning  Use JSON CMD/ENTRYPOINT\n")
@@ -84,6 +105,8 @@ pub fn report_rules() -> String {
   out.write_string("DL3042  warning  Use pip --no-cache-dir\n")
   out.write_string("DL3059  warning  Combine consecutive RUN\n")
   out.write_string("DL4000  error    MAINTAINER is deprecated\n")
+  out.write_string("DL4003  warning  Multiple CMD instructions\n")
+  out.write_string("DL4004  error    Multiple ENTRYPOINT instructions\n")
   out.write_string("DL4006  warning  Set pipefail before pipes\n")
   out.to_string()
 }

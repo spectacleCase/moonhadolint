@@ -140,6 +140,35 @@ test "copy from unknown and self stages" {
 }
 
 ///|
+test "extra high-frequency rules" {
+  let result = @moonhadolint.lint_source(
+    (
+      #|FROM alpine:3.19
+      #|COPY a b dest
+      #|RUN cd /tmp && npm install express
+      #|CMD echo one
+      #|CMD echo two
+      #|ENTRYPOINT echo a
+      #|ENTRYPOINT echo b
+      #|
+    ),
+  ).unwrap()
+  assert_true(result.has_code("DL3021"))
+  assert_true(result.has_code("DL3003"))
+  assert_true(result.has_code("DL3016"))
+  assert_true(result.has_code("DL4003"))
+  assert_true(result.has_code("DL4004"))
+  assert_true(result.has_code("DL3025"))
+}
+
+///|
+test "github annotations include file and line" {
+  let result = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
+  let text = @moonhadolint.report_github(result, path="Dockerfile")
+  assert_true(text.contains("::error file=Dockerfile,line=1::DL3006"))
+}
+
+///|
 test "json reports keep diagnostic codes" {
   let result = @moonhadolint.lint_source("FROM ubuntu\n").unwrap()
   let text = @moonhadolint.report_text(result)

@@ -50,6 +50,8 @@ jobs:
         run: |
           moon test --target native --deny-warn
           moon run --target native cmd/main -- lint examples/good.Dockerfile
+          moon run --target native cmd/main -- lint examples/multistage.Dockerfile
+          moon run --target native cmd/main -- annotate examples/bad.Dockerfile | grep "DL3006"
           if moon run --target native cmd/main -- lint examples/bad.Dockerfile; then
             echo "bad Dockerfile unexpectedly passed"
             exit 1

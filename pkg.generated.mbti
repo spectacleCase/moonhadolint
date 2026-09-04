@@ -20,6 +20,8 @@ pub fn parse_config(String) -> LintOptions
 
 pub fn parse_dockerfile(String) -> Result[Dockerfile, ParseError]
 
+pub fn report_github(LintResult, path? : String) -> String
+
 pub fn report_json(LintResult) -> String
 
 pub fn report_parse(Dockerfile) -> String

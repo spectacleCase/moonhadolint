@@ -15,9 +15,10 @@ MoonHadolint 是一个使用 MoonBit 编写的 Dockerfile 解析器与 hadolint 
 
 - 解析常见 Dockerfile 指令：`FROM`、`RUN`、`COPY`、`ADD`、`WORKDIR`、`ENV`、`EXPOSE`、`USER`、`CMD`、`ENTRYPOINT` 等；
 - 支持注释、空行和 `\` 续行；
-- 识别 `FROM` 标签、digest、registry 端口和 `AS` 别名；
-- 检查未打标签、`:latest`、相对 WORKDIR、root USER、`sudo`、包版本未固定、ADD 误用、连续 RUN 等问题；
-- 输出 text / JSON 报告；
+- 识别 `FROM` 标签、digest、registry 端口、`AS` 别名和 `COPY --from`；
+- 支持 `# hadolint ignore=`、`--ignore` 和小型配置文件；
+- 检查未打标签、`:latest`、相对 WORKDIR、root USER、`sudo`、包版本未固定、ADD 误用、连续 RUN、未知 stage 等问题；
+- 输出 text / JSON / GitHub annotations 报告；
 - 存在 error 级诊断时，CLI 返回非 0 退出码。
 
 ## 快速开始
@@ -35,18 +36,22 @@ moon test
 moon run --target native cmd/main -- sample
 moon run --target native cmd/main -- lint -
 moon run --target native cmd/main -- json examples/bad.Dockerfile
+moon run --target native cmd/main -- annotate examples/bad.Dockerfile
+moon run --target native cmd/main -- lint --ignore DL3006 examples/bad.Dockerfile
 moon run --target native cmd/main -- parse examples/good.Dockerfile
+moon run --target native cmd/main -- lint examples/multistage.Dockerfile
 ```
 
 ## 命令
 
 ```text
-moonhadolint lint  <Dockerfile>   检查文件并输出文本报告
-moonhadolint json  <Dockerfile>   输出 JSON 诊断
-moonhadolint parse <Dockerfile>   打印解析后的指令
-moonhadolint sample               打印内置干净示例
-moonhadolint bad-sample           打印内置问题示例
-moonhadolint rules                列出当前 MVP 规则
+moonhadolint lint     [--ignore CODE] [--config FILE] <Dockerfile>
+moonhadolint json     [--ignore CODE] [--config FILE] <Dockerfile>
+moonhadolint annotate [--ignore CODE] [--config FILE] <Dockerfile>
+moonhadolint parse    <Dockerfile>
+moonhadolint sample
+moonhadolint bad-sample
+moonhadolint rules
 ```
 
 文件路径写成 `-` 时，使用内置干净示例。直接传入 Dockerfile 路径时，默认执行 `lint`。

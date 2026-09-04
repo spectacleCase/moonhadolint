@@ -100,6 +100,32 @@ fn has_pip_install(arguments : String) -> Bool {
 }
 
 ///|
+fn copy_paths(arguments : String) -> Array[String] {
+  let result : Array[String] = []
+  let parts = tokens(arguments)
+  let mut i = 0
+  while i < parts.length() {
+    if parts[i].has_prefix("--") {
+      if !parts[i].contains("=") && i + 1 < parts.length() {
+        i += 2
+      } else {
+        i += 1
+      }
+    } else {
+      result.push(parts[i])
+      i += 1
+    }
+  }
+  result
+}
+
+///|
+fn has_npm_install(arguments : String) -> Bool {
+  find_ignore_case(arguments, "npm install") is Some(_) ||
+  find_ignore_case(arguments, "npm i ") is Some(_)
+}
+
+///|
 fn stage_index_of(value : String) -> Int? {
   let n = @string.parse_int(value) catch { _ => return None }
   if n >= 0 {
@@ -174,6 +200,8 @@ pub fn lint_dockerfile_with(
   let mut last_user_line = 1
   let mut has_pipefail = false
   let mut current_index = -1
+  let mut cmd_count = 0
+  let mut entrypoint_count = 0
   for inst in doc.instructions {
     match inst.kind {
       From => {
@@ -182,6 +210,8 @@ pub fn lint_dockerfile_with(
         last_user = None
         last_user_line = inst.line
         has_pipefail = false
+        cmd_count = 0
+        entrypoint_count = 0
         match inst.stage {
           Some(name) => named_stages.push(name)
           None => ()
@@ -199,7 +229,10 @@ pub fn lint_dockerfile_with(
             ),
           )
         }
-      Copy => check_copy_from(inst, named_stages, current_index, diagnostics)
+      Copy => {
+        check_copy_from(inst, named_stages, current_index, diagnostics)
+        check_copy_dest(inst, diagnostics)
+      }
       Add => {
         check_copy_from(inst, named_stages, current_index, diagnostics)
         if add_is_local_file(inst.arguments) {
@@ -240,17 +273,34 @@ pub fn lint_dockerfile_with(
         }
         check_run(inst, has_pipefail, diagnostics)
       }
-      Cmd | Entrypoint =>
-        if !(inst.form is Json) {
+      Cmd => {
+        cmd_count += 1
+        if cmd_count > 1 {
           diagnostics.push(
             diagnostic(
-              "DL3025",
+              "DL4003",
               "warning",
               inst.line,
-              "Use JSON notation for CMD and ENTRYPOINT arguments.",
+              "Multiple CMD instructions found. Only the last one takes effect.",
             ),
           )
         }
+        check_json_form(inst, diagnostics)
+      }
+      Entrypoint => {
+        entrypoint_count += 1
+        if entrypoint_count > 1 {
+          diagnostics.push(
+            diagnostic(
+              "DL4004",
+              "error",
+              inst.line,
+              "Multiple ENTRYPOINT instructions found.",
+            ),
+          )
+        }
+        check_json_form(inst, diagnostics)
+      }
       _ => ()
     }
     prev_run = inst.kind is Run
@@ -352,6 +402,41 @@ fn check_from(
             )
           }
       }
+    }
+  }
+}
+
+///|
+fn check_json_form(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
+  if !(inst.form is Json) {
+    diagnostics.push(
+      diagnostic(
+        "DL3025",
+        "warning",
+        inst.line,
+        "Use JSON notation for CMD and ENTRYPOINT arguments.",
+      ),
+    )
+  }
+}
+
+///|
+fn check_copy_dest(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
+  if inst.form is Json {
+    return
+  }
+  let paths = copy_paths(inst.arguments)
+  if paths.length() >= 3 {
+    let dest = paths[paths.length() - 1]
+    if !dest.has_suffix("/") && !dest.has_suffix("\\") {
+      diagnostics.push(
+        diagnostic(
+          "DL3021",
+          "error",
+          inst.line,
+          "COPY with more than two arguments requires the last argument to end with /",
+        ),
+      )
     }
   }
 }
@@ -473,6 +558,27 @@ fn check_run(
         ),
       )
     }
+  }
+  if contains_token(inst.arguments, "cd") {
+    diagnostics.push(
+      diagnostic(
+        "DL3003",
+        "warning",
+        inst.line,
+        "Use WORKDIR to switch to a directory.",
+      ),
+    )
+  }
+  if has_npm_install(inst.arguments) &&
+    packages_unpinned(install_packages(inst.arguments, "npm install")) {
+    diagnostics.push(
+      diagnostic(
+        "DL3016",
+        "warning",
+        inst.line,
+        "Pin versions in npm. Use package@version.",
+      ),
+    )
   }
   if inst.arguments.contains("|") && !has_pipefail {
     diagnostics.push(

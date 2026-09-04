@@ -5,9 +5,10 @@ fn usage() -> Unit {
       #|MoonHadolint v\{@moonhadolint.version}
       #|
       #|Usage:
-      #|  moonhadolint lint  [--ignore CODE] [--config FILE] <Dockerfile>
-      #|  moonhadolint json  [--ignore CODE] [--config FILE] <Dockerfile>
-      #|  moonhadolint parse <Dockerfile>
+      #|  moonhadolint lint     [--ignore CODE] [--config FILE] <Dockerfile>
+      #|  moonhadolint json     [--ignore CODE] [--config FILE] <Dockerfile>
+      #|  moonhadolint annotate [--ignore CODE] [--config FILE] <Dockerfile>
+      #|  moonhadolint parse    <Dockerfile>
       #|  moonhadolint sample
       #|  moonhadolint bad-sample
       #|  moonhadolint rules
@@ -109,7 +110,7 @@ fn parse_lint_args(
 ///|
 fn print_lint(
   path : String,
-  as_json : Bool,
+  format : String,
   options : @moonhadolint.LintOptions,
 ) -> Int {
   match load_source(path) {
@@ -124,10 +125,10 @@ fn print_lint(
           1
         }
         Ok(result) => {
-          if as_json {
-            println(@moonhadolint.report_json(result))
-          } else {
-            println(@moonhadolint.report_text(result))
+          match format {
+            "json" => println(@moonhadolint.report_json(result))
+            "github" => println(@moonhadolint.report_github(result, path~))
+            _ => println(@moonhadolint.report_text(result))
           }
           if result.has_errors() {
             1
@@ -161,7 +162,7 @@ fn print_parse(path : String) -> Int {
 }
 
 ///|
-fn run_lint(args : Array[String], start : Int, as_json : Bool) -> Int {
+fn run_lint(args : Array[String], start : Int, format : String) -> Int {
   match parse_lint_args(args, start) {
     Err(message) => {
       println(message)
@@ -173,7 +174,7 @@ fn run_lint(args : Array[String], start : Int, as_json : Bool) -> Int {
           println(message)
           1
         }
-        Ok(options) => print_lint(path, as_json, options)
+        Ok(options) => print_lint(path, format, options)
       }
   }
 }
@@ -202,8 +203,9 @@ fn main {
       println(@moonhadolint.report_rules())
       0
     }
-    "lint" => run_lint(args, 2, false)
-    "json" => run_lint(args, 2, true)
+    "lint" => run_lint(args, 2, "text")
+    "json" => run_lint(args, 2, "json")
+    "annotate" => run_lint(args, 2, "github")
     "parse" =>
       if args.length() < 3 {
         usage()
@@ -211,7 +213,7 @@ fn main {
       } else {
         print_parse(args[2])
       }
-    _ => run_lint(args, 1, false)
+    _ => run_lint(args, 1, "text")
   }
   if code != 0 {
     exit_process(code)
