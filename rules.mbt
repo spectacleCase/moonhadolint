@@ -202,6 +202,8 @@ pub fn lint_dockerfile_with(
   let mut current_index = -1
   let mut cmd_count = 0
   let mut entrypoint_count = 0
+  let mut wget_line = 0
+  let mut curl_line = 0
   for inst in doc.instructions {
     match inst.kind {
       From => {
@@ -276,6 +278,12 @@ pub fn lint_dockerfile_with(
             ),
           )
         }
+        if contains_token(inst.arguments, "wget") {
+          wget_line = inst.line
+        }
+        if contains_token(inst.arguments, "curl") {
+          curl_line = inst.line
+        }
         check_run(inst, has_pipefail, diagnostics)
       }
       Cmd => {
@@ -309,6 +317,13 @@ pub fn lint_dockerfile_with(
       _ => ()
     }
     prev_run = inst.kind is Run
+  }
+  if wget_line > 0 && curl_line > 0 {
+    diagnostics.push(
+      diagnostic(
+        "DL4001", "warning", curl_line, "Either use Wget or Curl but not both.",
+      ),
+    )
   }
   match last_user {
     None =>
@@ -368,6 +383,16 @@ fn check_from(
     Some(image) => {
       if is_scratch(image.name) || is_variable_ref(image.name) {
         return
+      }
+      if inst.arguments.contains("--platform") {
+        diagnostics.push(
+          diagnostic(
+            "DL3029",
+            "warning",
+            inst.line,
+            "Do not use --platform= with FROM. Use build arguments or the build command instead.",
+          ),
+        )
       }
       if options.trusted_registries.length() > 0 {
         let registry = image_registry(image.name)
@@ -582,6 +607,73 @@ fn check_run(
         "warning",
         inst.line,
         "Pin versions in npm. Use package@version.",
+      ),
+    )
+  }
+  if contains_token(inst.arguments, "apt") &&
+    !contains_token(inst.arguments, "apt-get") &&
+    !contains_token(inst.arguments, "apt-cache") {
+    diagnostics.push(
+      diagnostic(
+        "DL3027",
+        "warning",
+        inst.line,
+        "Do not use apt as it is meant to be an end-user tool. Use apt-get or apt-cache.",
+      ),
+    )
+  }
+  if find_ignore_case(inst.arguments, "yum install") is Some(_) {
+    if packages_unpinned(install_packages(inst.arguments, "yum install")) {
+      diagnostics.push(
+        diagnostic(
+          "DL3033",
+          "warning",
+          inst.line,
+          "Pin versions in yum install.",
+        ),
+      )
+    }
+    if !inst.arguments.contains("yum clean") {
+      diagnostics.push(
+        diagnostic(
+          "DL3032",
+          "warning",
+          inst.line,
+          "Use yum clean all after installing packages.",
+        ),
+      )
+    }
+  }
+  if find_ignore_case(inst.arguments, "dnf install") is Some(_) {
+    if packages_unpinned(install_packages(inst.arguments, "dnf install")) {
+      diagnostics.push(
+        diagnostic(
+          "DL3041",
+          "warning",
+          inst.line,
+          "Pin versions in dnf install.",
+        ),
+      )
+    }
+    if !inst.arguments.contains("dnf clean") {
+      diagnostics.push(
+        diagnostic(
+          "DL3040",
+          "warning",
+          inst.line,
+          "Use dnf clean all after installing packages.",
+        ),
+      )
+    }
+  }
+  if find_ignore_case(inst.arguments, "gem install") is Some(_) &&
+    packages_unpinned(install_packages(inst.arguments, "gem install")) {
+    diagnostics.push(
+      diagnostic(
+        "DL3028",
+        "warning",
+        inst.line,
+        "Pin versions in gem install. Use package:version.",
       ),
     )
   }
