@@ -5,6 +5,12 @@ pub(all) struct PairNode {
 } derive(Eq, Debug)
 
 ///|
+pub extend PairNode with Eq::{not_equal, equal}
+
+///|
+pub extend PairNode with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) struct FromNode {
   image : String
   tag : String?
@@ -14,12 +20,24 @@ pub(all) struct FromNode {
 } derive(Eq, Debug)
 
 ///|
+pub extend FromNode with Eq::{not_equal, equal}
+
+///|
+pub extend FromNode with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) struct CopyNode {
   from_stage : String?
   chown : String?
   sources : Array[String]
   dest : String
 } derive(Eq, Debug)
+
+///|
+pub extend CopyNode with Eq::{not_equal, equal}
+
+///|
+pub extend CopyNode with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) struct RunNode {
@@ -31,11 +49,23 @@ pub(all) struct RunNode {
 } derive(Eq, Debug)
 
 ///|
+pub extend RunNode with Eq::{not_equal, equal}
+
+///|
+pub extend RunNode with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) struct ExecNode {
   form : InstructionForm
   argv : Array[String]
   raw : String
 } derive(Eq, Debug)
+
+///|
+pub extend ExecNode with Eq::{not_equal, equal}
+
+///|
+pub extend ExecNode with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) enum Node {
@@ -55,11 +85,14 @@ pub(all) enum Node {
 } derive(Debug)
 
 ///|
+pub extend Node with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 fn pairs_of(arguments : String) -> Array[PairNode] {
   let result : Array[PairNode] = []
   for pair in env_pairs(arguments) {
     let (key, value) = pair
-    result.push({ key, value })
+    result.push({ key, value, })
   }
   result
 }
@@ -94,7 +127,7 @@ fn parse_exec_node(arguments : String, form : InstructionForm) -> ExecNode {
   } else {
     tokens(arguments)
   }
-  { form, argv, raw: arguments }
+  { form, argv, raw: arguments, }
 }
 
 ///|

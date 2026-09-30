@@ -5,7 +5,7 @@ fn diagnostic(
   line : Int,
   message : String,
 ) -> Diagnostic {
-  { code, level, line, message, stage: None }
+  { code, level, line, message, stage: None, }
 }
 
 ///|
@@ -404,7 +404,7 @@ pub fn lint_dockerfile_with(
       kept.push(with_stage(item, doc))
     }
   }
-  { diagnostics: kept, instruction_count: doc.instructions.length() }
+  { diagnostics: kept, instruction_count: doc.instructions.length(), }
 }
 
 ///|

@@ -25,11 +25,23 @@ pub(all) enum InstructionKind {
 } derive(Eq, Debug)
 
 ///|
+pub extend InstructionKind with Eq::{not_equal, equal}
+
+///|
+pub extend InstructionKind with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) enum InstructionForm {
   Shell
   Json
   Other
 } derive(Eq, Debug)
+
+///|
+pub extend InstructionForm with Eq::{not_equal, equal}
+
+///|
+pub extend InstructionForm with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) struct Instruction {
@@ -45,6 +57,9 @@ pub(all) struct Instruction {
 } derive(Debug)
 
 ///|
+pub extend Instruction with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) struct LintOptions {
   ignored : Array[String]
   trusted_registries : Array[String]
@@ -52,14 +67,20 @@ pub(all) struct LintOptions {
 } derive(Debug)
 
 ///|
+pub extend LintOptions with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub fn default_options() -> LintOptions {
-  { ignored: [], trusted_registries: [], required_labels: [] }
+  { ignored: [], trusted_registries: [], required_labels: [], }
 }
 
 ///|
 pub(all) struct Dockerfile {
   instructions : Array[Instruction]
 } derive(Debug)
+
+///|
+pub extend Dockerfile with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) struct Diagnostic {
@@ -71,10 +92,19 @@ pub(all) struct Diagnostic {
 } derive(Eq, Debug)
 
 ///|
+pub extend Diagnostic with Eq::{not_equal, equal}
+
+///|
+pub extend Diagnostic with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 pub(all) struct LintResult {
   diagnostics : Array[Diagnostic]
   instruction_count : Int
 } derive(Debug)
+
+///|
+pub extend LintResult with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) struct ParseError {
@@ -86,6 +116,9 @@ pub(all) struct ParseError {
 pub impl Show for ParseError with fn output(self, logger) {
   logger.write_string("parse error at line \{self.line}: \{self.message}")
 }
+
+///|
+pub extend ParseError with Show::{to_string, output}
 
 ///|
 pub fn LintResult::error_count(self : LintResult) -> Int {

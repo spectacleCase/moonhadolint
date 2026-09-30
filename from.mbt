@@ -34,11 +34,11 @@ fn parse_from_image(arguments : String) -> FromImage? {
 ///|
 fn split_image_ref(image : String) -> FromImage {
   match image.find("@") {
-    Some(_) => { name: image, tag: None, digest: true }
+    Some(_) => { name: image, tag: None, digest: true, }
     None => {
       let slash = image.rev_find("/").unwrap_or(-1)
       match image.rev_find(":") {
-        None => { name: image, tag: None, digest: false }
+        None => { name: image, tag: None, digest: false, }
         Some(colon) =>
           if colon > slash {
             {
@@ -47,7 +47,7 @@ fn split_image_ref(image : String) -> FromImage {
               digest: false,
             }
           } else {
-            { name: image, tag: None, digest: false }
+            { name: image, tag: None, digest: false, }
           }
       }
     }

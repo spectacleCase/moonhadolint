@@ -9,6 +9,17 @@ MoonHadolint 是一个使用 MoonBit 编写的 Dockerfile 解析器与 hadolint 
 - 和 `Lfan-ke/moonctl` 不同，本项目检查已有 Dockerfile，不生成脚手架；
 - 和 ignore 包不同，本项目不处理 `.dockerignore` glob。
 
+## 边界与关系说明（规避重复）
+
+MoonHadolint 的目标是“**Dockerfile 质量检查器**”，而不是通用语法基础设施：
+
+- 不提供通用的语法树增量更新能力（如 `Syntax tree / highlighter` 套件）；
+- 不提供编辑器级 tokenization、高亮、代码动作补全、语法树遍历 API；
+- 不提供语言服务器或构建编译流水线能力；
+- 不重建或依赖外部镜像布局，不替代 `mooncakes.io` 生态中的通用解析器/高亮器。
+
+它的输入是 Dockerfile 文本，输出是带规则码（DL/SC）、行号和严重级别的 linter 诊断；默认产物偏向 CI 检测与质量治理场景。`mooncakes.io/mizchi/syntree`（0.2.4）更偏通用语法树与高亮工具链，二者是互补关系而非替代关系。
+
 首版已经完成可运行 MVP：库 API、Native CLI、示例文件和自动化测试。
 
 ## 功能

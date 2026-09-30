@@ -49,6 +49,9 @@ pub(all) struct CopyNode {
   sources : Array[String]
   dest : String
 } derive(Eq, @debug.Debug)
+pub fn CopyNode::equal(Self, Self) -> Bool
+pub fn CopyNode::not_equal(Self, Self) -> Bool
+pub fn CopyNode::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Diagnostic {
   code : String
@@ -57,16 +60,23 @@ pub(all) struct Diagnostic {
   message : String
   stage : String?
 } derive(Eq, @debug.Debug)
+pub fn Diagnostic::equal(Self, Self) -> Bool
+pub fn Diagnostic::not_equal(Self, Self) -> Bool
+pub fn Diagnostic::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Dockerfile {
   instructions : Array[Instruction]
 } derive(@debug.Debug)
+pub fn Dockerfile::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ExecNode {
   form : InstructionForm
   argv : Array[String]
   raw : String
 } derive(Eq, @debug.Debug)
+pub fn ExecNode::equal(Self, Self) -> Bool
+pub fn ExecNode::not_equal(Self, Self) -> Bool
+pub fn ExecNode::to_repr(Self) -> @debug.Repr
 
 pub(all) struct FromNode {
   image : String
@@ -75,6 +85,9 @@ pub(all) struct FromNode {
   platform : String?
   as_name : String?
 } derive(Eq, @debug.Debug)
+pub fn FromNode::equal(Self, Self) -> Bool
+pub fn FromNode::not_equal(Self, Self) -> Bool
+pub fn FromNode::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Instruction {
   kind : InstructionKind
@@ -87,12 +100,16 @@ pub(all) struct Instruction {
   ignored_codes : Array[String]
   node : Node
 } derive(@debug.Debug)
+pub fn Instruction::to_repr(Self) -> @debug.Repr
 
 pub(all) enum InstructionForm {
   Shell
   Json
   Other
 } derive(Eq, @debug.Debug)
+pub fn InstructionForm::equal(Self, Self) -> Bool
+pub fn InstructionForm::not_equal(Self, Self) -> Bool
+pub fn InstructionForm::to_repr(Self) -> @debug.Repr
 
 pub(all) enum InstructionKind {
   From
@@ -115,12 +132,16 @@ pub(all) enum InstructionKind {
   Onbuild
   Unknown
 } derive(Eq, @debug.Debug)
+pub fn InstructionKind::equal(Self, Self) -> Bool
+pub fn InstructionKind::not_equal(Self, Self) -> Bool
+pub fn InstructionKind::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LintOptions {
   ignored : Array[String]
   trusted_registries : Array[String]
   required_labels : Array[String]
 } derive(@debug.Debug)
+pub fn LintOptions::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LintResult {
   diagnostics : Array[Diagnostic]
@@ -130,6 +151,7 @@ pub fn LintResult::error_count(Self) -> Int
 pub fn LintResult::has_code(Self, String) -> Bool
 pub fn LintResult::has_errors(Self) -> Bool
 pub fn LintResult::should_fail(Self, String) -> Bool
+pub fn LintResult::to_repr(Self) -> @debug.Repr
 pub fn LintResult::warning_count(Self) -> Int
 
 pub(all) enum Node {
@@ -147,16 +169,22 @@ pub(all) enum Node {
   User(String)
   Other
 } derive(@debug.Debug)
+pub fn Node::to_repr(Self) -> @debug.Repr
 
 pub(all) struct PairNode {
   key : String
   value : String
 } derive(Eq, @debug.Debug)
+pub fn PairNode::equal(Self, Self) -> Bool
+pub fn PairNode::not_equal(Self, Self) -> Bool
+pub fn PairNode::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ParseError {
   line : Int
   message : String
 }
+pub fn ParseError::output(Self, &Logger) -> Unit
+pub fn ParseError::to_string(Self) -> String
 pub impl Show for ParseError
 
 pub(all) struct RuleInfo {
@@ -164,6 +192,9 @@ pub(all) struct RuleInfo {
   level : String
   summary : String
 } derive(Eq, @debug.Debug)
+pub fn RuleInfo::equal(Self, Self) -> Bool
+pub fn RuleInfo::not_equal(Self, Self) -> Bool
+pub fn RuleInfo::to_repr(Self) -> @debug.Repr
 
 pub(all) struct RunNode {
   form : InstructionForm
@@ -172,6 +203,9 @@ pub(all) struct RunNode {
   has_pipe : Bool
   has_heredoc : Bool
 } derive(Eq, @debug.Debug)
+pub fn RunNode::equal(Self, Self) -> Bool
+pub fn RunNode::not_equal(Self, Self) -> Bool
+pub fn RunNode::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

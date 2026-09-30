@@ -104,5 +104,5 @@ pub fn parse_config(source : String) -> LintOptions {
       }
     }
   }
-  { ignored, trusted_registries: trusted, required_labels: required }
+  { ignored, trusted_registries: trusted, required_labels: required, }
 }

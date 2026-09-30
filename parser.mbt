@@ -73,7 +73,7 @@ fn join_continuations(source : String) -> Array[LogicalLine] {
         continuing = false
       }
     }
-    result.push({ text: buf.to_string(), line: start_line })
+    result.push({ text: buf.to_string(), line: start_line, })
   }
   result
 }
@@ -100,7 +100,7 @@ pub fn parse_dockerfile(source : String) -> Result[Dockerfile, ParseError] {
     }
     let (name, rest) = first_token(text)
     if name.is_empty() {
-      return Err({ line: logical.line, message: "missing instruction" })
+      return Err({ line: logical.line, message: "missing instruction", })
     }
     let kind = kind_of(name)
     let arguments = rest.trim().to_owned()
