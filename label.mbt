@@ -22,7 +22,7 @@ fn check_label(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
           "DL3048",
           "warning",
           inst.line,
-          "Invalid label key. Use lowercase letters, digits, dots, underscores, or dashes.",
+          "Label keys should use lowercase alphanumerics plus dot, underscore, or dash.",
         ),
       )
     }
@@ -42,7 +42,7 @@ fn check_required_labels(
           "DL3049",
           "warning",
           1,
-          "Required label is missing: \{label}",
+          "Configured label \{label} was not found.",
         ),
       )
     }

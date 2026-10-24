@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Rewrite diagnostic copy independently of hadolint / ShellCheck wording.
+- Document the GPL-3.0 upstreams and the scope of reused rule IDs in README.
+
 ## 0.1.2
 
 - Parse structured instruction nodes for FROM, COPY, ENV, CMD, and RUN.

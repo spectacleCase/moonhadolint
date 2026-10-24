@@ -29,7 +29,7 @@ fn check_env(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
         "DL3044",
         "warning",
         inst.line,
-        "Do not use empty ENV instructions.",
+        "ENV should define at least one key-value pair.",
       ),
     )
     return
@@ -42,7 +42,7 @@ fn check_env(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
           "DL3044",
           "warning",
           inst.line,
-          "Do not use environment variables without a value.",
+          "ENV keys should not be left with an empty value.",
         ),
       )
     }

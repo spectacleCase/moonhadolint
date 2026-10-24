@@ -95,7 +95,7 @@ fn check_shell(
         "SC2086",
         "warning",
         inst.line,
-        "Double quote to prevent globbing and word splitting.",
+        "Quote variable expansions that should stay as one argument.",
       ),
     )
   }
@@ -105,7 +105,7 @@ fn check_shell(
         "SC2046",
         "warning",
         inst.line,
-        "Quote this to prevent word splitting.",
+        "Quote command substitution results when they should not be split.",
       ),
     )
   }
@@ -115,7 +115,7 @@ fn check_shell(
         "SC2068",
         "warning",
         inst.line,
-        "Double quote array expansions to avoid re-splitting.",
+        "Quote $@ or $* expansions to preserve argument boundaries.",
       ),
     )
   }
@@ -125,7 +125,7 @@ fn check_shell(
         "SC2164",
         "warning",
         inst.line,
-        "Use `cd ... || exit` in case cd fails.",
+        "Handle cd failures explicitly before running later commands.",
       ),
     )
   }

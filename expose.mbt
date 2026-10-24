@@ -15,7 +15,7 @@ fn check_expose(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
             "DL3011",
             "error",
             inst.line,
-            "Valid UNIX ports range from 0 to 65535.",
+            "EXPOSE must use a numeric port between 0 and 65535.",
           ),
         )
         continue
@@ -27,7 +27,7 @@ fn check_expose(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
           "DL3011",
           "error",
           inst.line,
-          "Valid UNIX ports range from 0 to 65535.",
+          "EXPOSE must use a numeric port between 0 and 65535.",
         ),
       )
     }
@@ -47,7 +47,7 @@ fn check_unique_stage(
         "DL3024",
         "error",
         line,
-        "FROM aliases must be unique. \{name} is used twice.",
+        "Stage alias \{name} is declared more than once.",
       ),
     )
   }

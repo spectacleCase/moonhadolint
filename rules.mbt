@@ -179,7 +179,7 @@ fn check_copy_from(
             "DL3023",
             "error",
             inst.line,
-            "COPY --from cannot reference its own FROM alias.",
+            "COPY --from points back to the current build stage.",
           ),
         )
         return
@@ -200,7 +200,7 @@ fn check_copy_from(
             "DL3022",
             "error",
             inst.line,
-            "COPY --from should reference a previously defined FROM alias.",
+            "COPY --from names a stage that has not been defined earlier.",
           ),
         )
       }
@@ -239,7 +239,7 @@ pub fn lint_dockerfile_with(
             "DL3061",
             "error",
             doc.instructions[0].line,
-            "Invalid instruction order. Dockerfile must begin with FROM, ARG, or a comment.",
+            "Start the Dockerfile with FROM, ARG, or a comment before other instructions.",
           ),
         )
     }
@@ -270,7 +270,7 @@ pub fn lint_dockerfile_with(
               "DL3000",
               "error",
               inst.line,
-              "Use absolute WORKDIR. Changing directory with relative paths can produce unexpected results.",
+              "WORKDIR should be absolute so later paths resolve predictably.",
             ),
           )
         }
@@ -286,7 +286,7 @@ pub fn lint_dockerfile_with(
               "DL3020",
               "error",
               inst.line,
-              "Use COPY instead of ADD for files and directories.",
+              "Prefer COPY when adding local files or directories.",
             ),
           )
         }
@@ -297,7 +297,7 @@ pub fn lint_dockerfile_with(
             "DL4000",
             "error",
             inst.line,
-            "MAINTAINER is deprecated. Use LABEL instead.",
+            "Replace MAINTAINER with an image LABEL.",
           ),
         )
       Env => check_env(inst, diagnostics)
@@ -321,7 +321,7 @@ pub fn lint_dockerfile_with(
               "DL3059",
               "warning",
               inst.line,
-              "Multiple consecutive RUN instructions. Combine them to reduce layers.",
+              "Adjacent RUN instructions can usually be merged into one layer.",
             ),
           )
         }
@@ -348,7 +348,7 @@ pub fn lint_dockerfile_with(
               "DL4003",
               "warning",
               inst.line,
-              "Multiple CMD instructions found. Only the last one takes effect.",
+              "Only the final CMD instruction is used at runtime.",
             ),
           )
         }
@@ -362,7 +362,7 @@ pub fn lint_dockerfile_with(
               "DL4004",
               "error",
               inst.line,
-              "Multiple ENTRYPOINT instructions found.",
+              "Keep a single ENTRYPOINT instruction in a stage.",
             ),
           )
         }
@@ -376,7 +376,7 @@ pub fn lint_dockerfile_with(
   if wget_line > 0 && curl_line > 0 {
     diagnostics.push(
       diagnostic(
-        "DL4001", "warning", curl_line, "Either use Wget or Curl but not both.",
+        "DL4001", "warning", curl_line, "Choose one download tool instead of mixing wget and curl.",
       ),
     )
   }
@@ -385,7 +385,7 @@ pub fn lint_dockerfile_with(
       if doc.instructions.length() > 0 {
         diagnostics.push(
           diagnostic(
-            "DL3002", "warning", 1, "Last USER should not be root. Add a non-root USER instruction.",
+            "DL3002", "warning", 1, "End the image with an explicit non-root USER.",
           ),
         )
       }
@@ -393,7 +393,7 @@ pub fn lint_dockerfile_with(
       if user == "" || user.equal_ignore_ascii_case("root") || user == "0" {
         diagnostics.push(
           diagnostic(
-            "DL3002", "warning", last_user_line, "Last USER should not be root.",
+            "DL3002", "warning", last_user_line, "The final USER resolves to root.",
           ),
         )
       }
@@ -443,7 +443,7 @@ fn check_from(
               "DL3029",
               "warning",
               inst.line,
-              "Do not use --platform= with FROM. Use build arguments or the build command instead.",
+              "Avoid baking a fixed platform into FROM; pass it through build configuration.",
             ),
           )
       }
@@ -455,7 +455,7 @@ fn check_from(
               "DL3026",
               "error",
               inst.line,
-              "Use only an allowed registry: \{registry} is not trusted.",
+              "Image registry \{registry} is outside the configured allowlist.",
             ),
           )
         }
@@ -470,7 +470,7 @@ fn check_from(
               "DL3006",
               "error",
               inst.line,
-              "Always tag the version of an image explicitly.",
+              "Pin the base image with an explicit tag or digest.",
             ),
           )
         Some(tag) =>
@@ -480,7 +480,7 @@ fn check_from(
                 "DL3007",
                 "warning",
                 inst.line,
-                "Using latest is prone to errors from image updates.",
+                "The latest tag can change underneath reproducible builds.",
               ),
             )
           }
@@ -488,7 +488,7 @@ fn check_from(
     }
     _ =>
       diagnostics.push(
-        diagnostic("DL3006", "error", inst.line, "FROM is missing an image."),
+        diagnostic("DL3006", "error", inst.line, "FROM must name a base image."),
       )
   }
 }
@@ -501,7 +501,7 @@ fn check_json_form(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit 
         "DL3025",
         "warning",
         inst.line,
-        "Use JSON notation for CMD and ENTRYPOINT arguments.",
+        "Prefer exec-form JSON arrays for CMD and ENTRYPOINT.",
       ),
     )
   }
@@ -521,7 +521,7 @@ fn check_copy_dest(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit 
           "DL3021",
           "error",
           inst.line,
-          "COPY with more than two arguments requires the last argument to end with /",
+          "When COPY has multiple sources, make the destination a directory path.",
         ),
       )
     }
@@ -540,7 +540,7 @@ fn check_run(
         "DL3004",
         "error",
         inst.line,
-        "Do not use sudo as it leads to unpredictable behavior. Use a USER instruction instead.",
+        "Avoid sudo inside RUN; switch users with Dockerfile instructions.",
       ),
     )
   }
@@ -552,7 +552,7 @@ fn check_run(
         "DL3005",
         "error",
         inst.line,
-        "Do not use apt-get upgrade or dist-upgrade.",
+        "Avoid upgrading the base distribution during image build.",
       ),
     )
   }
@@ -565,7 +565,7 @@ fn check_run(
           "DL3014",
           "warning",
           inst.line,
-          "Use the -y switch to avoid manual input from apt-get.",
+          "Make apt installs non-interactive with an explicit yes flag.",
         ),
       )
     }
@@ -575,7 +575,7 @@ fn check_run(
           "DL3015",
           "warning",
           inst.line,
-          "Avoid additional packages by specifying --no-install-recommends.",
+          "Limit apt dependencies by disabling recommended packages.",
         ),
       )
     }
@@ -586,7 +586,7 @@ fn check_run(
           "DL3008",
           "warning",
           inst.line,
-          "Pin versions in apt-get install. Use package=version.",
+          "Pin apt packages with a version constraint.",
         ),
       )
     }
@@ -596,7 +596,7 @@ fn check_run(
           "DL3009",
           "warning",
           inst.line,
-          "Delete the apt-get lists after installing packages.",
+          "Remove apt package lists before the layer is committed.",
         ),
       )
     }
@@ -608,7 +608,7 @@ fn check_run(
           "DL3019",
           "warning",
           inst.line,
-          "Use the --no-cache switch with apk add to avoid extra cache cleanup.",
+          "Install apk packages without keeping the package index cache.",
         ),
       )
     }
@@ -618,7 +618,7 @@ fn check_run(
           "DL3018",
           "warning",
           inst.line,
-          "Pin versions in apk add. Use package=version.",
+          "Pin apk packages with an exact version.",
         ),
       )
     }
@@ -631,7 +631,7 @@ fn check_run(
           "DL3013",
           "warning",
           inst.line,
-          "Pin versions in pip. Use package==version.",
+          "Pin Python packages when installing with pip.",
         ),
       )
     }
@@ -641,7 +641,7 @@ fn check_run(
           "DL3042",
           "warning",
           inst.line,
-          "Avoid pip cache with --no-cache-dir.",
+          "Disable pip's download cache in image builds.",
         ),
       )
     }
@@ -652,7 +652,7 @@ fn check_run(
         "DL3003",
         "warning",
         inst.line,
-        "Use WORKDIR to switch to a directory.",
+        "Prefer WORKDIR over changing directories inside RUN.",
       ),
     )
   }
@@ -663,7 +663,7 @@ fn check_run(
         "DL3016",
         "warning",
         inst.line,
-        "Pin versions in npm. Use package@version.",
+        "Pin npm dependencies with explicit versions.",
       ),
     )
   }
@@ -675,7 +675,7 @@ fn check_run(
         "DL3027",
         "warning",
         inst.line,
-        "Do not use apt as it is meant to be an end-user tool. Use apt-get or apt-cache.",
+        "Use apt-get or apt-cache for scripts instead of the apt frontend.",
       ),
     )
   }
@@ -686,7 +686,7 @@ fn check_run(
           "DL3033",
           "warning",
           inst.line,
-          "Pin versions in yum install.",
+          "Pin yum packages during installation.",
         ),
       )
     }
@@ -696,7 +696,7 @@ fn check_run(
           "DL3032",
           "warning",
           inst.line,
-          "Use yum clean all after installing packages.",
+          "Clean yum metadata after package installation.",
         ),
       )
     }
@@ -708,7 +708,7 @@ fn check_run(
           "DL3041",
           "warning",
           inst.line,
-          "Pin versions in dnf install.",
+          "Pin dnf packages during installation.",
         ),
       )
     }
@@ -718,7 +718,7 @@ fn check_run(
           "DL3040",
           "warning",
           inst.line,
-          "Use dnf clean all after installing packages.",
+          "Clean dnf metadata after package installation.",
         ),
       )
     }
@@ -730,7 +730,7 @@ fn check_run(
         "DL3028",
         "warning",
         inst.line,
-        "Pin versions in gem install. Use package:version.",
+        "Pin Ruby gems when installing them in the image.",
       ),
     )
   }
@@ -740,7 +740,7 @@ fn check_run(
         "DL4006",
         "warning",
         inst.line,
-        "Set the SHELL option -o pipefail before RUN with a pipe.",
+        "Enable pipefail before relying on a piped RUN command.",
       ),
     )
   }

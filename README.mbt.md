@@ -107,7 +107,25 @@ MoonHadolint 首版有意保持聚焦：
 - 对 `RUN` 只做高频 shell 子集（SC2086 / SC2046 / SC2068 / SC2164），不是完整 ShellCheck；
 - 不替代 Docker build、BuildKit 或镜像扫描工具。
 
-规则编号与 [hadolint](https://github.com/hadolint/hadolint) 对齐，实现使用 MoonBit 重写，许可证为 Apache-2.0。
+规则编号与 [hadolint](https://github.com/hadolint/hadolint) 对齐，便于对照既有 CI 习惯。实现是独立的 MoonBit 重写，不是 hadolint 的源码移植，也不包含其 Haskell 实现。
+
+## 上游来源与许可范围
+
+本仓库许可证为 **Apache-2.0**。
+
+参考上游：
+
+- [hadolint](https://github.com/hadolint/hadolint)，许可证 **GPL-3.0**
+- 规则编号中的 `SC*` 子集对齐 [ShellCheck](https://github.com/koalaman/shellcheck) 的常见编号，许可证同样为 **GPL-3.0**
+
+授权与复用范围：
+
+- **参考**：规则编号（`DL*` / `SC*`）、检查意图和常见 Dockerfile 坏味道。
+- **不包含**：hadolint / ShellCheck 的源代码、配置文件，以及它们仓库中的诊断原文。
+- **本项目文案**：`rules.mbt`、`catalog.mbt` 等处的诊断与摘要均由本项目独立撰写，不逐字复用上游 GPL 文案，因此不以 GPL 条款再授权这些字符串。
+- **兼容性**：保留相同规则码是为了让现有 `# hadolint ignore=` 和 CI 配置能继续使用，不表示本项目是 hadolint 的衍生作品或完整替代。
+
+如需完整 hadolint / ShellCheck 行为（尤其是完整 shell AST），请使用上游工具本身；本项目只覆盖上述范围内的独立重实现。
 
 ## 许可证
 
