@@ -7,12 +7,12 @@ fn is_ws(ch : Char) -> Bool {
 }
 
 ///|
-fn char_at(source : String, pos : Int) -> Char? {
+fn char_at(source : String, pos : Int32) -> Char? {
   source.get_char(pos)
 }
 
 ///|
-fn skip_ws(source : String, pos : Int) -> Int {
+fn skip_ws(source : String, pos : Int32) -> Int32 {
   let mut i = pos
   while i < source.length() {
     match char_at(source, i) {
@@ -78,7 +78,7 @@ fn contains_token(source : String, token : String) -> Bool {
 }
 
 ///|
-fn find_ignore_case(source : String, needle : String) -> Int? {
+fn find_ignore_case(source : String, needle : String) -> Int32? {
   source.to_lower().find(needle.to_lower())
 }
 

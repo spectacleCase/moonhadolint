@@ -56,7 +56,7 @@ pub fn CopyNode::to_repr(Self) -> @debug.Repr
 pub(all) struct Diagnostic {
   code : String
   level : String
-  line : Int
+  line : Int32
   message : String
   stage : String?
 } derive(Eq, @debug.Debug)
@@ -93,7 +93,7 @@ pub(all) struct Instruction {
   kind : InstructionKind
   name : String
   arguments : String
-  line : Int
+  line : Int32
   form : InstructionForm
   stage : String?
   copy_from : String?
@@ -145,14 +145,14 @@ pub fn LintOptions::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LintResult {
   diagnostics : Array[Diagnostic]
-  instruction_count : Int
+  instruction_count : Int32
 } derive(@debug.Debug)
-pub fn LintResult::error_count(Self) -> Int
+pub fn LintResult::error_count(Self) -> Int32
 pub fn LintResult::has_code(Self, String) -> Bool
 pub fn LintResult::has_errors(Self) -> Bool
 pub fn LintResult::should_fail(Self, String) -> Bool
 pub fn LintResult::to_repr(Self) -> @debug.Repr
-pub fn LintResult::warning_count(Self) -> Int
+pub fn LintResult::warning_count(Self) -> Int32
 
 pub(all) enum Node {
   From(FromNode)
@@ -180,7 +180,7 @@ pub fn PairNode::not_equal(Self, Self) -> Bool
 pub fn PairNode::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ParseError {
-  line : Int
+  line : Int32
   message : String
 }
 pub fn ParseError::output(Self, &Logger) -> Unit

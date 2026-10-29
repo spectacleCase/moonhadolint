@@ -1,7 +1,7 @@
 ///|
 priv struct LogicalLine {
   text : String
-  line : Int
+  line : Int32
 }
 
 ///|

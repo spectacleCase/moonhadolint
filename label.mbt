@@ -5,7 +5,7 @@ fn valid_label_key(key : String) -> Bool {
   }
   for ch in key {
     match ch {
-      'a'..='z' | '0'..='9' | '.' | '_' | '-' => ()
+      'a'..<='z' | '0'..<='9' | '.' | '_' | '-' => ()
       _ => return false
     }
   }

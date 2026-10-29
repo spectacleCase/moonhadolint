@@ -1,7 +1,7 @@
 ///|
 fn is_ident_start(ch : Char) -> Bool {
   match ch {
-    'A'..='Z' | 'a'..='z' | '_' => true
+    'A'..<='Z' | 'a'..<='z' | '_' => true
     _ => false
   }
 }

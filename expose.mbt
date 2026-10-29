@@ -38,7 +38,7 @@ fn check_expose(inst : Instruction, diagnostics : Array[Diagnostic]) -> Unit {
 fn check_unique_stage(
   name : String,
   named_stages : Array[String],
-  line : Int,
+  line : Int32,
   diagnostics : Array[Diagnostic],
 ) -> Unit {
   if contains_code(named_stages, name) {

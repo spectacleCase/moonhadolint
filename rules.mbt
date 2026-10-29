@@ -2,14 +2,14 @@
 fn diagnostic(
   code : String,
   level : String,
-  line : Int,
+  line : Int32,
   message : String,
 ) -> Diagnostic {
   { code, level, line, message, stage: None, }
 }
 
 ///|
-fn stage_at(doc : Dockerfile, line : Int) -> String? {
+fn stage_at(doc : Dockerfile, line : Int32) -> String? {
   for inst in doc.instructions {
     if inst.line == line {
       return inst.stage
@@ -151,7 +151,7 @@ fn has_npm_install(arguments : String) -> Bool {
 }
 
 ///|
-fn stage_index_of(value : String) -> Int? {
+fn stage_index_of(value : String) -> Int32? {
   let n = @string.parse_int(value) catch { _ => return None }
   if n >= 0 {
     Some(n)
@@ -164,7 +164,7 @@ fn stage_index_of(value : String) -> Int? {
 fn check_copy_from(
   inst : Instruction,
   named_stages : Array[String],
-  current_index : Int,
+  current_index : Int32,
   diagnostics : Array[Diagnostic],
 ) -> Unit {
   match inst.copy_from {

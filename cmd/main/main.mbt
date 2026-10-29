@@ -60,7 +60,7 @@ fn load_options(
 }
 
 ///|
-fn take_flag(args : Array[String], index : Int, name : String) -> String? {
+fn take_flag(args : Array[String], index : Int32, name : String) -> String? {
   if args[index] == name && index + 1 < args.length() {
     Some(args[index + 1])
   } else if args[index].has_prefix("\{name}=") {
@@ -73,7 +73,7 @@ fn take_flag(args : Array[String], index : Int, name : String) -> String? {
 ///|
 fn parse_lint_args(
   args : Array[String],
-  start : Int,
+  start : Int32,
 ) -> Result[(String, String?, String?, String), String] {
   let mut path : String? = None
   let mut ignore : String? = None
@@ -123,7 +123,7 @@ fn print_lint(
   format : String,
   options : @moonhadolint.LintOptions,
   threshold : String,
-) -> Int {
+) -> Int32 {
   match load_source(path) {
     Err(message) => {
       println(message)
@@ -152,7 +152,7 @@ fn print_lint(
 }
 
 ///|
-fn print_parse(path : String) -> Int {
+fn print_parse(path : String) -> Int32 {
   match load_source(path) {
     Err(message) => {
       println(message)
@@ -173,7 +173,7 @@ fn print_parse(path : String) -> Int {
 }
 
 ///|
-fn run_lint(args : Array[String], start : Int, format : String) -> Int {
+fn run_lint(args : Array[String], start : Int32, format : String) -> Int32 {
   match parse_lint_args(args, start) {
     Err(message) => {
       println(message)

@@ -48,7 +48,7 @@ pub(all) struct Instruction {
   kind : InstructionKind
   name : String
   arguments : String
-  line : Int
+  line : Int32
   form : InstructionForm
   stage : String?
   copy_from : String?
@@ -86,7 +86,7 @@ pub extend Dockerfile with @moonbitlang/core/debug.Debug::{to_repr}
 pub(all) struct Diagnostic {
   code : String
   level : String
-  line : Int
+  line : Int32
   message : String
   stage : String?
 } derive(Eq, Debug)
@@ -100,7 +100,7 @@ pub extend Diagnostic with @moonbitlang/core/debug.Debug::{to_repr}
 ///|
 pub(all) struct LintResult {
   diagnostics : Array[Diagnostic]
-  instruction_count : Int
+  instruction_count : Int32
 } derive(Debug)
 
 ///|
@@ -108,7 +108,7 @@ pub extend LintResult with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub(all) struct ParseError {
-  line : Int
+  line : Int32
   message : String
 }
 
@@ -121,7 +121,7 @@ pub impl Show for ParseError with fn output(self, logger) {
 pub extend ParseError with Show::{to_string, output}
 
 ///|
-pub fn LintResult::error_count(self : LintResult) -> Int {
+pub fn LintResult::error_count(self : LintResult) -> Int32 {
   let mut count = 0
   for item in self.diagnostics {
     if item.level == "error" {
@@ -132,7 +132,7 @@ pub fn LintResult::error_count(self : LintResult) -> Int {
 }
 
 ///|
-pub fn LintResult::warning_count(self : LintResult) -> Int {
+pub fn LintResult::warning_count(self : LintResult) -> Int32 {
   let mut count = 0
   for item in self.diagnostics {
     if item.level == "warning" {

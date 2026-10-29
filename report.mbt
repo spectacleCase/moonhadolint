@@ -54,7 +54,7 @@ pub fn report_json(result : LintResult) -> String {
 ///|
 pub fn report_github(
   result : LintResult,
-  path? : String = "Dockerfile",
+  path~ : String = "Dockerfile",
 ) -> String {
   let out = StringBuilder()
   for item in result.diagnostics {

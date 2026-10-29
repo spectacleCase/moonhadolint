@@ -1,6 +1,6 @@
 ///|
 #borrow(path)
-extern "c" fn file_exists_raw(path : Bytes) -> Int = "moonhadolint_file_exists"
+extern "c" fn file_exists_raw(path : Bytes) -> Int32 = "moonhadolint_file_exists"
 
 ///|
 #borrow(path)
@@ -10,7 +10,7 @@ extern "c" fn read_file_raw(path : Bytes) -> Bytes = "moonhadolint_read_file"
 extern "c" fn read_stdin_raw() -> Bytes = "moonhadolint_read_stdin"
 
 ///|
-extern "c" fn exit_raw(code : Int) -> Unit = "moonhadolint_exit"
+extern "c" fn exit_raw(code : Int32) -> Unit = "moonhadolint_exit"
 
 ///|
 fn file_exists(path : String) -> Bool {
@@ -31,6 +31,6 @@ fn read_stdin() -> String {
 }
 
 ///|
-fn exit_process(code : Int) -> Unit {
+fn exit_process(code : Int32) -> Unit {
   exit_raw(code)
 }
