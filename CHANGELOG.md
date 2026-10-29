@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+## 0.1.3
+
 - Rewrite diagnostic copy independently of hadolint / ShellCheck wording.
 - Document the GPL-3.0 upstreams and the scope of reused rule IDs in README.
+- Reformat sources for moonc 0.10.18 / moonfmt.
 
 ## 0.1.2
 
